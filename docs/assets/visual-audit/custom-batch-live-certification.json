@@ -1,0 +1,116 @@
+{
+  "capturedAt": "2026-09-23T22:24:00+02:00",
+  "homeAssistantVersion": "2026.9.3",
+  "candidate": {
+    "commit": "e7ff53a",
+    "resource": "/local/community/mushroom-cards-addition/mushroom-cards-addition.js?v=1.5.0-365a5413",
+    "sha256": "365A5413F20770DA2484814E14F383C809882D3B56E42F3A28EB6C0DC57D187E",
+    "bytes": 403297,
+    "backupSuffix": "20260923-222051",
+    "dashboardBackupSuffix": "20260923-222142"
+  },
+  "results": {
+    "custom_card_afvalophaling": {
+      "live": true,
+      "geometry": {
+        "width": 330,
+        "height": 248,
+        "clientWidth": 330,
+        "scrollWidth": 330
+      },
+      "renderedStreams": 5,
+      "suppressedSentinelSummary": true,
+      "moreInfoEntity": "sensor.afvalinfo_home_trash_type_today"
+    },
+    "custom_card_alarm_time": {
+      "live": true,
+      "geometry": {
+        "width": 330,
+        "height": 136.578125,
+        "clientWidth": 330,
+        "scrollWidth": 330
+      },
+      "renderedTime": "21:30",
+      "moreInfoEntity": "input_boolean.mode_alarm",
+      "configuredMissingDatetimeControls": [
+        {
+          "ariaLabel": "Earlier by 15 minutes",
+          "disabled": true
+        },
+        {
+          "ariaLabel": "Later by 15 minutes",
+          "disabled": true
+        }
+      ],
+      "stateChangingControlsNotOperatedLive": true
+    },
+    "custom_card_apexcharts": {
+      "live": true,
+      "geometry": {
+        "width": 330,
+        "height": 300,
+        "clientWidth": 330,
+        "scrollWidth": 330
+      },
+      "series": [
+        "sensor.cv_plug_power",
+        "sensor.wasmachine_plug_power",
+        "sensor.dryer_plug_power"
+      ],
+      "moreInfoEntity": "sensor.cv_plug_power"
+    },
+    "custom_card_camera": {
+      "live": true,
+      "geometry": {
+        "width": 330,
+        "height": 260.578125,
+        "clientWidth": 330,
+        "scrollWidth": 330
+      },
+      "imageLoaded": true,
+      "moreInfoEntity": "camera.frontyard_high_resolution_channel"
+    },
+    "custom_card_chromecast": {
+      "live": true,
+      "geometry": {
+        "width": 330,
+        "height": 132.578125,
+        "clientWidth": 330,
+        "scrollWidth": 330
+      },
+      "moreInfoEntity": "media_player.office_joris_google_2",
+      "configuredMissingPlayerControls": [
+        {
+          "ariaLabel": "Toggle power",
+          "disabled": true
+        },
+        {
+          "ariaLabel": "Play or pause",
+          "disabled": true
+        },
+        {
+          "ariaLabel": "Toggle input",
+          "disabled": true
+        }
+      ],
+      "physicalMediaControlsNotOperatedLive": true
+    },
+    "custom_card_damix48_power_details": {
+      "live": true,
+      "geometry": {
+        "width": 330,
+        "height": 270,
+        "clientWidth": 330,
+        "scrollWidth": 330
+      },
+      "historyEntity": "sensor.cv_plug_power",
+      "hours": 24,
+      "moreInfoEntity": "sensor.cv_plug_power"
+    }
+  },
+  "editorAndPicker": {
+    "registrationsFound": 6,
+    "graphicalSchemasLoaded": 6,
+    "semanticConfigRoundTripsPassed": 6
+  }
+}
