@@ -45,7 +45,9 @@
         "ulm_card_fan_horizontal": false,
         "ulm_show_button": true,
         "ulm_button_service": "fan.oscillate",
-        "oscillate_attribute": "oscillate"
+        "oscillate_attribute": "oscillate",
+        "tap_action": { "action": "toggle" },
+        "hold_action": { "action": "more-info" }
       },
       "visibleInteractions": [
         { "surface": "card", "gesture": "tap", "payload": { "action": "toggle", "entity": "fan.air_purifier" } },
@@ -108,7 +110,8 @@
     },
     "custom_card_senoro_win": {
       "liveConfig": {
-        "entity": "binary_sensor.office_joris_window"
+        "entity": "binary_sensor.office_joris_window",
+        "tap_action": { "action": "none" }
       },
       "visibleInteractions": [],
       "artifact": "docs/assets/visual-audit/custom-card-senoro-win-comparison.png",
