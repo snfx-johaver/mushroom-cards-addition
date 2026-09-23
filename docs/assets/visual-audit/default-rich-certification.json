@@ -11,11 +11,11 @@
       "interactions": ["card surface: more-info for entity"],
       "liveConfig": {
         "type": "custom:mushroom-addition-card-generic",
-        "entity": "sensor.default_rich_generic",
+        "entity": "sensor.bedroom_temperature_2",
         "variant": "default"
       },
       "requiredEntities": {
-        "sensor.default_rich_generic": "Any sensor or entity with a friendly name, icon, state, and optional unit."
+        "sensor.bedroom_temperature_2": "Prepared live bedroom temperature sensor."
       }
     },
     "card_generic_swap": {
@@ -26,11 +26,11 @@
       "interactions": ["card surface: more-info for entity"],
       "liveConfig": {
         "type": "custom:mushroom-addition-card-generic",
-        "entity": "sensor.default_rich_generic_swap",
+        "entity": "sensor.cv_plug_power",
         "variant": "swapped"
       },
       "requiredEntities": {
-        "sensor.default_rich_generic_swap": "Any sensor or entity with a friendly name, icon, state, and optional unit."
+        "sensor.cv_plug_power": "Prepared live CV plug power sensor."
       }
     },
     "card_graph": {
@@ -41,14 +41,12 @@
       "interactions": ["card surface: more-info for primary entity"],
       "liveConfig": {
         "type": "custom:mushroom-addition-card-graph",
-        "entity": "sensor.default_rich_graph",
-        "ulm_card_graph_entity2": "sensor.default_rich_graph_secondary",
+        "entity": "sensor.cv_plug_power",
         "ulm_card_graph_hours": 24,
         "ulm_card_graph_type": "fill"
       },
       "requiredEntities": {
-        "sensor.default_rich_graph": "Numeric sensor with recorder history, friendly name, icon, and unit.",
-        "sensor.default_rich_graph_secondary": "Optional numeric secondary sensor with recorder history."
+        "sensor.cv_plug_power": "Prepared numeric CV plug power sensor with recorder history."
       }
     },
     "card_light": {
@@ -65,14 +63,14 @@
       ],
       "liveConfig": {
         "type": "custom:mushroom-addition-card-light",
-        "entity": "light.default_rich_light",
+        "entity": "light.joris_iris_1",
         "tap_action": { "action": "toggle" },
         "ulm_card_light_enable_slider": true,
         "ulm_card_light_enable_buttons": true,
         "ulm_card_light_enable_color": true
       },
       "requiredEntities": {
-        "light.default_rich_light": "Dimmable light exposing brightness; rgb_color is optional for entity-color styling."
+        "light.joris_iris_1": "Prepared dimmable Iris light; live certification must not operate it."
       }
     },
     "card_media_player": {
@@ -94,8 +92,8 @@
       ],
       "liveConfig": {
         "type": "custom:mushroom-addition-card-media-player",
-        "entity": "media_player.default_rich_media",
-        "ulm_card_media_player_player_controls_entity": "media_player.default_rich_media",
+        "entity": "media_player.office_joris_tv_2",
+        "ulm_card_media_player_player_controls_entity": "media_player.office_joris_tv_2",
         "ulm_card_media_player_enable_art": true,
         "ulm_card_media_player_enable_controls": true,
         "ulm_card_media_player_enable_volume_slider": true,
@@ -104,7 +102,7 @@
         "ulm_card_media_player_more_info": true
       },
       "requiredEntities": {
-        "media_player.default_rich_media": "Media player supporting transport and volume services; entity_picture, media_title, media_artist, media_album_name, volume_level, is_volume_muted, source_list, and device_class improve fidelity."
+        "media_player.office_joris_tv_2": "Prepared office TV media player; live certification must remain render/more-info only."
       }
     },
     "card_navigate": {
@@ -117,7 +115,7 @@
         "type": "custom:mushroom-addition-card-navigate",
         "name": "Media",
         "icon": "mdi:account",
-        "navigation_path": "/lovelace/media"
+        "navigation_path": "/config/updates"
       },
       "requiredEntities": {}
     }
