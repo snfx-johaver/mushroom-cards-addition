@@ -1,0 +1,42 @@
+{
+  "capturedAt": "2026-09-23T22:06:45+02:00",
+  "upstreamCommit": "f8a9cb67a53f91367f1dffe18516aa983b463cb5",
+  "sources": {
+    "card_battery": {
+      "cardSurface": ["tap", "hold", "double_tap", "keyboard"],
+      "controls": []
+    },
+    "card_binary_sensor": {
+      "cardSurface": ["tap", "hold", "double_tap", "keyboard"],
+      "controls": []
+    },
+    "card_binary_sensor_alert": {
+      "cardSurface": ["tap", "hold", "double_tap", "keyboard"],
+      "controls": []
+    },
+    "card_cover": {
+      "cardSurface": ["tap", "hold", "double_tap", "keyboard"],
+      "controls": [
+        { "label": "Close", "service": "cover.close_cover", "data": { "entity_id": "cover.blind" } },
+        { "label": "Stop", "service": "cover.stop_cover", "data": { "entity_id": "cover.blind" } },
+        { "label": "Open", "service": "cover.open_cover", "data": { "entity_id": "cover.blind" } },
+        { "label": "Move to 35%", "service": "cover.set_cover_position", "data": { "entity_id": "cover.blind", "position": 35 } },
+        { "label": "Cover position", "service": "cover.set_cover_position", "data": { "entity_id": "cover.blind", "position": 55 } },
+        { "label": "Close tilt", "service": "cover.close_cover_tilt", "data": { "entity_id": "cover.blind" } },
+        { "label": "Stop tilt", "service": "cover.stop_cover_tilt", "data": { "entity_id": "cover.blind" } },
+        { "label": "Open tilt", "service": "cover.open_cover_tilt", "data": { "entity_id": "cover.blind" } }
+      ]
+    },
+    "card_fan": {
+      "cardSurface": ["tap", "hold", "double_tap", "keyboard"],
+      "controls": [
+        { "label": "Fan speed", "service": "fan.set_percentage", "data": { "entity_id": "fan.bedroom", "percentage": 65 } },
+        { "label": "Toggle oscillation", "service": "fan.oscillate", "data": { "entity_id": "fan.bedroom", "oscillating": false } }
+      ]
+    },
+    "card_input_boolean": {
+      "cardSurface": ["tap", "hold", "double_tap", "keyboard"],
+      "controls": []
+    }
+  }
+}
