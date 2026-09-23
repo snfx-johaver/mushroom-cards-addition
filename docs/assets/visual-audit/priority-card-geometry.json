@@ -150,10 +150,10 @@
     }
   },
   "nik-nas": {
-    "capturedAt": "2026-09-23T19:31:23.440Z",
+    "capturedAt": "2026-09-23T19:40:51.006Z",
     "implementation": {
       "width": 510,
-      "height": 384
+      "height": 360
     },
     "reference": {
       "width": 511.86,
@@ -161,7 +161,7 @@
     },
     "surface": {
       "width": 510,
-      "height": 384
+      "height": 360
     },
     "icons": {
       ".nik-nas-tile-icon ha-icon": [
@@ -286,10 +286,10 @@
     }
   },
   "person-info": {
-    "capturedAt": "2026-09-23T19:31:23.440Z",
+    "capturedAt": "2026-09-23T19:40:51.006Z",
     "implementation": {
       "width": 165,
-      "height": 92
+      "height": 105
     },
     "reference": {
       "width": 165,
@@ -297,7 +297,7 @@
     },
     "surface": {
       "width": 165,
-      "height": 92
+      "height": 105
     },
     "icons": {
       ".person-info-badge ha-icon": [
