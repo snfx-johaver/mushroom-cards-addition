@@ -1,0 +1,90 @@
+{
+  "verifiedAt": "2026-09-23T22:39:00+02:00",
+  "homeAssistantVersion": "2026.9.3",
+  "candidate": {
+    "branch": "snfx-johaver-certify-default-controls",
+    "commit": "46fa17cd476bd2b82a9562a0b7cca4b6d7a732f7",
+    "resource": "/local/community/mushroom-cards-addition/mushroom-cards-addition.js?v=1.6.0-controls-ef28e5aa",
+    "sha256": "EF28E5AA5625A2266CD3D1612D91D48EC49E5D672235C9F6476E8ABC06EA83EB",
+    "bytes": 416508,
+    "backupSuffix": "20260923-223651"
+  },
+  "dashboard": {
+    "urlPath": "mushroom-addition-catalog",
+    "binaryAlertRestored": true,
+    "backupSuffix": "20260923-223732"
+  },
+  "sources": {
+    "card_battery": {
+      "entity": "sensor.yvette_mobile_battery_level",
+      "text": "92% Yvette mobile Battery level",
+      "geometry": [330, 68.578125],
+      "overflow": false,
+      "moreInfoEntity": "sensor.yvette_mobile_battery_level",
+      "screenshot": "live-controls-battery.png"
+    },
+    "card_binary_sensor": {
+      "entity": "binary_sensor.all_doors",
+      "geometry": [330, 68.578125],
+      "overflow": false,
+      "moreInfoEntity": "binary_sensor.all_doors",
+      "screenshot": "live-controls-binary.png"
+    },
+    "card_binary_sensor_alert": {
+      "entity": "binary_sensor.all_smoke_sensors",
+      "variant": "alert",
+      "text": "All smoke sensors off",
+      "geometry": [330, 68.578125],
+      "overflow": false,
+      "moreInfoEntity": "binary_sensor.all_smoke_sensors",
+      "screenshot": "live-controls-binary-alert.png"
+    },
+    "card_cover": {
+      "entity": "cover.sunscreen",
+      "text": "Sunscreen closed",
+      "geometry": [330, 102],
+      "overflow": false,
+      "moreInfoEntity": "cover.sunscreen",
+      "controlsDisabledByLiveConfig": true,
+      "physicalActionsOperated": false,
+      "screenshot": "live-controls-cover.png"
+    },
+    "card_fan": {
+      "entity": "fan.air_purifier",
+      "text": "Air purifier off",
+      "geometry": [330, 102],
+      "overflow": false,
+      "moreInfoEntity": "fan.air_purifier",
+      "controlsDisabledByLiveConfig": true,
+      "physicalActionsOperated": false,
+      "screenshot": "live-controls-fan.png"
+    },
+    "card_input_boolean": {
+      "entity": "input_boolean.dropdown_welcome",
+      "geometry": [330, 68.578125],
+      "overflow": false,
+      "stateTransition": ["off", "on", "off"],
+      "restored": true,
+      "screenshot": "live-controls-input-boolean.png"
+    }
+  },
+  "picker": {
+    "registrations": [
+      "mushroom-addition-card-battery",
+      "mushroom-addition-card-binary-sensor",
+      "mushroom-addition-card-cover",
+      "mushroom-addition-card-fan",
+      "mushroom-addition-card-input-boolean"
+    ],
+    "allPreviewable": true,
+    "card_binary_sensor_alert": "Exposed through the graphical Binary Sensor Card variant selector."
+  },
+  "editor": {
+    "batterySemanticEntities": true,
+    "binaryAlertVariantFields": true,
+    "coverSafetyAndControlFields": true,
+    "fanSafetyAndControlFields": true,
+    "inputBooleanActionFields": true
+  },
+  "accepted": true
+}
