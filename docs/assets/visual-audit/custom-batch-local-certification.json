@@ -1,0 +1,261 @@
+{
+  "capturedAt": "2026-09-23T20:14:52.660Z",
+  "browserInteractions": {
+    "custom_card_afvalophaling": {
+      "visibleControls": 0,
+      "cardActions": [
+        {
+          "config": {
+            "type": "custom:mushroom-addition-custom-card-afvalophaling",
+            "entity": "sensor.afvalinfo_home_restafval",
+            "show_icon": true,
+            "show_state": true,
+            "show_controls": true,
+            "primary_info": "name",
+            "secondary_info": "default",
+            "show_today": true,
+            "today_entity": "sensor.afvalinfo_home_trash_type_today",
+            "show_tomorrow": true,
+            "tomorrow_entity": "sensor.afvalinfo_home_trash_type_tomorrow",
+            "waste_streams": [
+              {
+                "enabled": true,
+                "entity": "sensor.afvalinfo_home_restafval",
+                "label": "Residual waste",
+                "icon": "mdi:trash-can",
+                "color": "#43a047"
+              },
+              {
+                "enabled": true,
+                "entity": "sensor.afvalinfo_home_papier",
+                "label": "Paper",
+                "icon": "mdi:newspaper-variant",
+                "color": "#1e88e5"
+              },
+              {
+                "enabled": true,
+                "entity": "sensor.afvalinfo_home_pbd",
+                "label": "Packaging / PBD",
+                "icon": "mdi:recycle",
+                "color": "#f9a825"
+              },
+              {
+                "enabled": true,
+                "entity": "sensor.afvalinfo_home_gft",
+                "label": "Organic / GFT",
+                "icon": "mdi:leaf",
+                "color": "#7cb342"
+              },
+              {
+                "enabled": false,
+                "entity": "",
+                "label": "Glass",
+                "icon": "mdi:bottle-soda",
+                "color": "#00897b"
+              },
+              {
+                "enabled": true,
+                "entity": "sensor.afvalinfo_home_grofvuil",
+                "label": "Bulky waste",
+                "icon": "mdi:sofa",
+                "color": "#8d6e63"
+              }
+            ],
+            "layout": "default",
+            "name_mode": "entity",
+            "icon_type": "icon",
+            "fill_container": false,
+            "tap_action": {
+              "action": "more-info"
+            }
+          },
+          "action": "tap"
+        }
+      ]
+    },
+    "custom_card_alarm_time": {
+      "controlsClicked": 2,
+      "serviceCalls": [
+        [
+          "input_datetime",
+          "set_datetime",
+          {
+            "entity_id": "input_datetime.alarm",
+            "time": "08:15:00"
+          }
+        ],
+        [
+          "input_datetime",
+          "set_datetime",
+          {
+            "entity_id": "input_datetime.alarm",
+            "time": "08:45:00"
+          }
+        ]
+      ]
+    },
+    "custom_card_apexcharts": {
+      "visibleControls": 0,
+      "cardActions": [
+        {
+          "config": {
+            "type": "custom:mushroom-addition-custom-card-apexcharts",
+            "entity": "sensor.download",
+            "show_icon": true,
+            "show_state": true,
+            "show_controls": true,
+            "primary_info": "name",
+            "secondary_info": "default",
+            "entities": [
+              "sensor.ping",
+              "sensor.upload"
+            ],
+            "layout": "default",
+            "name_mode": "entity",
+            "icon_type": "icon",
+            "fill_container": false,
+            "tap_action": {
+              "action": "more-info"
+            }
+          },
+          "action": "tap"
+        }
+      ]
+    },
+    "custom_card_camera": {
+      "visibleControls": 0,
+      "cardActions": [
+        {
+          "config": {
+            "type": "custom:mushroom-addition-custom-card-camera",
+            "entity": "camera.driveway",
+            "show_icon": true,
+            "show_state": true,
+            "show_controls": true,
+            "primary_info": "name",
+            "secondary_info": "default",
+            "ulm_custom_card_camera_title": true,
+            "ulm_custom_card_camera_name": "Driveway",
+            "ulm_custom_card_camera_label": "Live camera",
+            "ulm_custom_card_camera_aspect_ratio": "16 / 9",
+            "name": "Driveway",
+            "layout": "default",
+            "name_mode": "entity",
+            "icon_type": "icon",
+            "fill_container": false,
+            "tap_action": {
+              "action": "more-info"
+            }
+          },
+          "action": "tap"
+        }
+      ]
+    },
+    "custom_card_chromecast": {
+      "controlsClicked": 3,
+      "serviceCalls": [
+        [
+          "media_player",
+          "toggle",
+          {
+            "entity_id": "media_player.chromecast"
+          }
+        ],
+        [
+          "media_player",
+          "media_play_pause",
+          {
+            "entity_id": "media_player.chromecast"
+          }
+        ],
+        [
+          "media_player",
+          "toggle",
+          {
+            "entity_id": "media_player.chromecast"
+          }
+        ]
+      ]
+    },
+    "custom_card_damix48_power_details": {
+      "visibleControls": 0,
+      "cardActions": [
+        {
+          "config": {
+            "type": "custom:mushroom-addition-custom-card-damix48-power-details",
+            "entity": "sensor.power",
+            "show_icon": true,
+            "show_state": true,
+            "show_controls": true,
+            "primary_info": "name",
+            "secondary_info": "default",
+            "icon": "mdi:flash",
+            "ulm_card_power_details_hours": 2,
+            "ulm_card_power_details_height": 180,
+            "layout": "default",
+            "name_mode": "entity",
+            "icon_type": "icon",
+            "fill_container": false,
+            "tap_action": {
+              "action": "more-info"
+            }
+          },
+          "action": "tap"
+        }
+      ]
+    }
+  },
+  "geometry": {
+    "custom_card_afvalophaling": {
+      "width": 320,
+      "height": 248,
+      "regions": {
+        ".custom-card-heading": 1,
+        ".waste-row": 5
+      }
+    },
+    "custom_card_alarm_time": {
+      "width": 440,
+      "height": 134,
+      "regions": {
+        ".custom-card-heading": 1,
+        ".alarm-time-controls": 1,
+        ".alarm-time-controls button": 2
+      }
+    },
+    "custom_card_apexcharts": {
+      "width": 640,
+      "height": 300,
+      "regions": {
+        ".apex-series": 3,
+        ".apex-chart": 1,
+        ".apex-line": 3
+      }
+    },
+    "custom_card_camera": {
+      "width": 250,
+      "height": 258,
+      "regions": {
+        ".camera-title": 1,
+        "img": 1
+      }
+    },
+    "custom_card_chromecast": {
+      "width": 608,
+      "height": 130,
+      "regions": {
+        ".custom-card-heading": 1,
+        ".chromecast-controls button": 3
+      }
+    },
+    "custom_card_damix48_power_details": {
+      "width": 385,
+      "height": 270,
+      "regions": {
+        ".power-details-heading": 1,
+        ".power-details-value": 1,
+        ".power-details-chart": 1
+      }
+    }
+  }
+}
