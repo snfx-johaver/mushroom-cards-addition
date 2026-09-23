@@ -1,0 +1,218 @@
+{
+  "upstreamCommit": "f8a9cb67a53f91367f1dffe18516aa983b463cb5",
+  "inspectedAt": "2026-09-23",
+  "liveAccepted": false,
+  "fixture": "demo/default-batch-one-comparison.html",
+  "test": "tests/default-batch-one-certification.test.ts",
+  "sources": {
+    "card_person": {
+      "liveConfig": {
+        "entity": "person.joris",
+        "battery_entity": "sensor.joris_mobile_battery_level"
+      },
+      "visibleInteractions": [
+        {
+          "surface": "card",
+          "gesture": "tap",
+          "payload": {
+            "action": "more-info",
+            "entity": "person.joris"
+          }
+        }
+      ],
+      "artifact": "docs/assets/visual-audit/card_person-comparison.png"
+    },
+    "card_power_outlet": {
+      "liveConfig": {
+        "entity": "switch.cv_plug",
+        "consumption_entity": "sensor.cv_plug_power"
+      },
+      "visibleInteractions": [
+        {
+          "surface": "card",
+          "gesture": "tap",
+          "payload": {
+            "action": "more-info",
+            "entity": "switch.cv_plug"
+          }
+        }
+      ],
+      "artifact": "docs/assets/visual-audit/card_power_outlet-comparison.png"
+    },
+    "card_room": {
+      "liveConfig": {
+        "entity": "light.joris_iris_1",
+        "room_sensors": [
+          {
+            "entity": "sensor.office_joris_motion_illuminance",
+            "label": "Light"
+          },
+          {
+            "entity": "sensor.bedroom_temperature_2",
+            "label": "Temperature"
+          }
+        ]
+      },
+      "visibleInteractions": [
+        {
+          "surface": "card",
+          "gesture": "tap",
+          "payload": {
+            "action": "more-info",
+            "entity": "light.joris_iris_1"
+          }
+        },
+        {
+          "surface": "room sensor",
+          "gesture": "tap",
+          "payload": {
+            "action": "toggle",
+            "entity": "<room_sensors[n].entity>"
+          }
+        },
+        {
+          "surface": "room sensor",
+          "gesture": "hold",
+          "payload": {
+            "action": "more-info",
+            "entity": "<room_sensors[n].entity>"
+          }
+        },
+        {
+          "surface": "card",
+          "gesture": "double_tap",
+          "payload": {
+            "action": "perform-action",
+            "perform_action": "input_select.select_option",
+            "target": {
+              "entity_id": "<input_select_entity>"
+            },
+            "data": {
+              "option": "<input_select_option>"
+            }
+          },
+          "visibility": "only when input_select_entity and input_select_option are configured"
+        }
+      ],
+      "artifact": "docs/assets/visual-audit/card_room-comparison.png"
+    },
+    "card_scenes": {
+      "liveConfig": {
+        "scene_items": [
+          {
+            "entity": "scene.living_room_relax",
+            "label": "Relax"
+          },
+          {
+            "entity": "scene.living_room_dimmed",
+            "label": "Dimmed"
+          }
+        ]
+      },
+      "visibleInteractions": [
+        {
+          "entityDomain": "scene",
+          "service": "scene.turn_on",
+          "data": {
+            "entity_id": "<scene_items[n].entity>"
+          }
+        },
+        {
+          "entityDomain": "media_player",
+          "service": "media_player.media_play_pause",
+          "data": {
+            "entity_id": "<scene_items[n].entity>"
+          }
+        },
+        {
+          "entityDomain": "input_select",
+          "service": "input_select.select_option",
+          "data": {
+            "entity_id": "<scene_items[n].entity>",
+            "option": "<scene_items[n].state>"
+          }
+        },
+        {
+          "entityDomain": "script",
+          "service": "script.turn_on",
+          "data": {
+            "entity_id": "<scene_items[n].entity>"
+          }
+        },
+        {
+          "entityDomain": "other",
+          "service": "homeassistant.toggle",
+          "data": {
+            "entity_id": "<scene_items[n].entity>"
+          }
+        }
+      ],
+      "artifact": "docs/assets/visual-audit/card_scenes-comparison.png"
+    },
+    "card_script": {
+      "liveConfig": {
+        "entity": "script.welcome_home_briefing"
+      },
+      "visibleInteractions": [
+        {
+          "surface": "card",
+          "gesture": "tap",
+          "payload": {
+            "action": "more-info",
+            "entity": "script.welcome_home_briefing"
+          }
+        }
+      ],
+      "artifact": "docs/assets/visual-audit/card_script-comparison.png"
+    },
+    "card_thermostat": {
+      "liveConfig": {
+        "entity": "climate.living_room"
+      },
+      "visibleInteractions": [
+        {
+          "control": "temperature decrease/increase",
+          "service": "climate.set_temperature",
+          "data": {
+            "entity_id": "climate.living_room",
+            "temperature": "<current target plus or minus configured step>"
+          }
+        },
+        {
+          "control": "dual setpoint decrease/increase",
+          "service": "climate.set_temperature",
+          "data": {
+            "entity_id": "climate.living_room",
+            "target_temp_low": "<adjusted low>",
+            "target_temp_high": "<adjusted high respecting minimum spread>"
+          }
+        },
+        {
+          "control": "HVAC mode",
+          "service": "climate.set_hvac_mode",
+          "data": {
+            "entity_id": "climate.living_room",
+            "hvac_mode": "<visible supported mode>"
+          }
+        },
+        {
+          "control": "external fan",
+          "service": "fan.toggle",
+          "data": {
+            "entity_id": "<fan_entity>"
+          },
+          "visibility": "only when fan_entity is configured and fan_only is unsupported"
+        },
+        {
+          "surface": "card",
+          "gesture": "tap",
+          "payload": {
+            "action": "more-info",
+            "entity": "climate.living_room"
+          }
+        }
+      ],
+      "artifact": "docs/assets/visual-audit/card_thermostat-comparison.png"
+    }
+  }
+}
