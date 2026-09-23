@@ -1,0 +1,125 @@
+{
+  "upstreamCommit": "f8a9cb67a53f91367f1dffe18516aa983b463cb5",
+  "fixture": "demo/default-rich-comparison.html",
+  "matchedImplementationWidth": 320,
+  "sources": {
+    "card_generic": {
+      "artifact": "docs/assets/visual-audit/card_generic-comparison.png",
+      "artifactSha256": "26197275edc143fd7cc365316a1734eb2418880556c4f03282b29bd5cf79b75d",
+      "artifactSize": [704, 167],
+      "referenceCrop": [55, 55, 1000, 270],
+      "interactions": ["card surface: more-info for entity"],
+      "liveConfig": {
+        "type": "custom:mushroom-addition-card-generic",
+        "entity": "sensor.default_rich_generic",
+        "variant": "default"
+      },
+      "requiredEntities": {
+        "sensor.default_rich_generic": "Any sensor or entity with a friendly name, icon, state, and optional unit."
+      }
+    },
+    "card_generic_swap": {
+      "artifact": "docs/assets/visual-audit/card_generic_swap-comparison.png",
+      "artifactSha256": "fb96253451d9cd1b544c077be266cc77d96874548ffef0df61be1303f77dd5c9",
+      "artifactSize": [704, 167],
+      "referenceCrop": [55, 55, 1000, 270],
+      "interactions": ["card surface: more-info for entity"],
+      "liveConfig": {
+        "type": "custom:mushroom-addition-card-generic",
+        "entity": "sensor.default_rich_generic_swap",
+        "variant": "swapped"
+      },
+      "requiredEntities": {
+        "sensor.default_rich_generic_swap": "Any sensor or entity with a friendly name, icon, state, and optional unit."
+      }
+    },
+    "card_graph": {
+      "artifact": "docs/assets/visual-audit/card_graph-comparison.png",
+      "artifactSha256": "d7470a7f4a213e7204e8133cc3cb50fe9f52c35e57ae4f89c46183c43250ac2b",
+      "artifactSize": [704, 236],
+      "referenceCrop": [590, 55, 1000, 485],
+      "interactions": ["card surface: more-info for primary entity"],
+      "liveConfig": {
+        "type": "custom:mushroom-addition-card-graph",
+        "entity": "sensor.default_rich_graph",
+        "ulm_card_graph_entity2": "sensor.default_rich_graph_secondary",
+        "ulm_card_graph_hours": 24,
+        "ulm_card_graph_type": "fill"
+      },
+      "requiredEntities": {
+        "sensor.default_rich_graph": "Numeric sensor with recorder history, friendly name, icon, and unit.",
+        "sensor.default_rich_graph_secondary": "Optional numeric secondary sensor with recorder history."
+      }
+    },
+    "card_light": {
+      "artifact": "docs/assets/visual-audit/card_light-comparison.png",
+      "artifactSha256": "d77f0f0ed84f02d116c94898de7fefc3775bf039418d0de2e968fda0d5ba745b",
+      "artifactSize": [704, 218],
+      "referenceCrop": [10, 82, 286, 122],
+      "interactions": [
+        "card surface: configured tap action",
+        "brightness slider: light.turn_on brightness_pct",
+        "low preset: light.turn_on brightness_pct",
+        "medium preset: light.turn_on brightness_pct",
+        "high preset: light.turn_on brightness_pct"
+      ],
+      "liveConfig": {
+        "type": "custom:mushroom-addition-card-light",
+        "entity": "light.default_rich_light",
+        "tap_action": { "action": "toggle" },
+        "ulm_card_light_enable_slider": true,
+        "ulm_card_light_enable_buttons": true,
+        "ulm_card_light_enable_color": true
+      },
+      "requiredEntities": {
+        "light.default_rich_light": "Dimmable light exposing brightness; rgb_color is optional for entity-color styling."
+      }
+    },
+    "card_media_player": {
+      "artifact": "docs/assets/visual-audit/card_media_player-comparison.png",
+      "artifactSha256": "3a1c80f1b5e87a1afb63c971958928e97450ded7fa379fff0c978afe3d831b87",
+      "artifactSize": [704, 253],
+      "referenceCrop": [8, 8, 242, 130],
+      "interactions": [
+        "card surface: configured tap action",
+        "power: homeassistant.toggle",
+        "previous: media_player.media_previous_track",
+        "play/pause: media_player.media_play_pause",
+        "next: media_player.media_next_track",
+        "sources: more-info for control entity",
+        "volume slider: media_player.volume_set",
+        "mute: media_player.volume_mute",
+        "volume down: media_player.volume_set",
+        "volume up: media_player.volume_set"
+      ],
+      "liveConfig": {
+        "type": "custom:mushroom-addition-card-media-player",
+        "entity": "media_player.default_rich_media",
+        "ulm_card_media_player_player_controls_entity": "media_player.default_rich_media",
+        "ulm_card_media_player_enable_art": true,
+        "ulm_card_media_player_enable_controls": true,
+        "ulm_card_media_player_enable_volume_slider": true,
+        "ulm_card_media_player_enable_volume_buttons": true,
+        "ulm_card_media_player_power_button": true,
+        "ulm_card_media_player_more_info": true
+      },
+      "requiredEntities": {
+        "media_player.default_rich_media": "Media player supporting transport and volume services; entity_picture, media_title, media_artist, media_album_name, volume_level, is_volume_muted, source_list, and device_class improve fidelity."
+      }
+    },
+    "card_navigate": {
+      "artifact": "docs/assets/visual-audit/card_navigate-comparison.png",
+      "artifactSha256": "a9c55e469de91dc5a23a1b5b482e18112140ff17ca38f8d75a54a6cb8cce44f8",
+      "artifactSize": [704, 167],
+      "referenceCrop": [55, 55, 1000, 270],
+      "interactions": ["card surface: navigate to configured dashboard path"],
+      "liveConfig": {
+        "type": "custom:mushroom-addition-card-navigate",
+        "name": "Media",
+        "icon": "mdi:account",
+        "navigation_path": "/lovelace/media"
+      },
+      "requiredEntities": {}
+    }
+  }
+}
