@@ -1,0 +1,162 @@
+{
+  "certifiedAt": "2026-09-23T23:11:00+02:00",
+  "homeAssistant": {
+    "url": "http://192.168.1.4:8123",
+    "dashboard": "mushroom-addition-catalog",
+    "cardWidth": 330
+  },
+  "candidate": {
+    "commit": "87e5920d37600e29c1caf022f6ed4ba0016afb86",
+    "resource": "/local/community/mushroom-cards-addition/mushroom-cards-addition.js?v=1.6.0-status-1b7220b3",
+    "sha256": "1B7220B37A16036665B0BA1732CF5D1027E40B8231E999151B4565396EB658F5",
+    "bytes": 488358,
+    "backupSuffix": "20260923-230952"
+  },
+  "dashboard": {
+    "backupSuffix": "20260923-231006",
+    "cardCount": 84,
+    "replaced": 6,
+    "appended": 0
+  },
+  "sources": {
+    "custom_card_mpse_wifisignal": {
+      "config": {
+        "entity": "sensor.yvette_mobile_signal_strength_sim_1"
+      },
+      "renderedText": "Yvette mobile Signal strength (SIM 1) -108 dBm",
+      "geometry": {
+        "width": 330,
+        "height": 65,
+        "scrollWidth": 330
+      },
+      "pickerRegistered": true,
+      "editorVerified": true,
+      "safeInteraction": {
+        "action": "more-info",
+        "entity": "sensor.yvette_mobile_signal_strength_sim_1"
+      },
+      "screenshot": "live-status-mushroom-addition-custom-card-mpse-wifisignal.png",
+      "liveAccepted": true
+    },
+    "custom_card_nas": {
+      "config": {
+        "entity": "sensor.all_nas_disks_status",
+        "ulm_custom_card_nas_text": "NAS status",
+        "ulm_custom_card_nas_unit": ""
+      },
+      "renderedText": "Nas NAS status normal",
+      "geometry": {
+        "width": 330,
+        "height": 65,
+        "scrollWidth": 330
+      },
+      "pickerRegistered": true,
+      "editorVerified": true,
+      "safeInteraction": {
+        "action": "more-info",
+        "entity": "sensor.all_nas_disks_status"
+      },
+      "screenshot": "live-status-mushroom-addition-custom-card-nas.png",
+      "liveAccepted": true
+    },
+    "custom_card_neekster_update": {
+      "config": {
+        "entity": "update.home_assistant_core_update",
+        "ulm_card_neekster_update_enable_controls": true
+      },
+      "renderedText": "Home Assistant Core Update Up to Date.",
+      "geometry": {
+        "width": 330,
+        "height": 133,
+        "scrollWidth": 330
+      },
+      "pickerRegistered": true,
+      "editorVerified": true,
+      "controls": [
+        {
+          "ariaLabel": "Install update",
+          "disabled": true
+        },
+        {
+          "ariaLabel": "Skip update",
+          "disabled": true
+        }
+      ],
+      "safeInteraction": {
+        "action": "more-info",
+        "entity": "update.home_assistant_core_update"
+      },
+      "updateActionsOperated": false,
+      "screenshot": "live-status-mushroom-addition-custom-card-neekster-update.png",
+      "liveAccepted": true
+    },
+    "custom_card_nik_clock": {
+      "config": {
+        "entity": "sensor.time",
+        "date_entity": "sensor.date_time"
+      },
+      "renderedText": "23:10 2026-09-23, 23:10",
+      "geometry": {
+        "width": 330,
+        "height": 108,
+        "scrollWidth": 330
+      },
+      "pickerRegistered": true,
+      "editorVerified": true,
+      "safeInteraction": {
+        "action": "none",
+        "urlChanged": false
+      },
+      "screenshot": "live-status-mushroom-addition-custom-card-nik-clock.png",
+      "liveAccepted": true
+    },
+    "custom_card_nik_door": {
+      "config": {
+        "entity": "binary_sensor.all_doors"
+      },
+      "renderedText": "All doors off",
+      "geometry": {
+        "width": 330,
+        "height": 78,
+        "scrollWidth": 330
+      },
+      "pickerRegistered": true,
+      "editorVerified": true,
+      "safeInteraction": {
+        "action": "more-info",
+        "entity": "binary_sensor.all_doors"
+      },
+      "lockActionsOperated": false,
+      "limitation": "No lock_entity or battery_entity was supplied, so no physical lock controls are shown.",
+      "screenshot": "live-status-mushroom-addition-custom-card-nik-door.png",
+      "liveAccepted": true
+    },
+    "custom_card_paddy_dwd_pollen": {
+      "config": {
+        "entity": "sensor.kleenex_pollen_radar_home_grass_level",
+        "level_entity": "sensor.kleenex_pollen_radar_home_grass_level"
+      },
+      "renderedText": "Kleenex Pollen Radar (Home) Grass Level none",
+      "geometry": {
+        "width": 330,
+        "height": 66,
+        "scrollWidth": 330
+      },
+      "pickerRegistered": true,
+      "editorVerified": true,
+      "safeInteraction": {
+        "action": "more-info",
+        "entity": "sensor.kleenex_pollen_radar_home_grass_level"
+      },
+      "screenshot": "live-status-mushroom-addition-custom-card-paddy-dwd-pollen.png",
+      "liveAccepted": true
+    }
+  },
+  "result": {
+    "accepted": 6,
+    "overflowFailures": 0,
+    "pickerFailures": 0,
+    "editorFailures": 0,
+    "safeInteractionFailures": 0
+  }
+}
