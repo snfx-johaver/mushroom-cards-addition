@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: |
+          git clone --quiet --filter=blob:none --no-checkout https://github.com/UI-Lovelace-Minimalist/UI.git .tmp-ui-minimalist
+          git -C .tmp-ui-minimalist checkout --quiet f8a9cb67a53f91367f1dffe18516aa983b463cb5
+      - run: npm run check:parity-source
+      - run: npm run validate
+      - run: git diff --exit-code -- dist/mushroom-cards-addition.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mushroom-cards-addition
+          path: |
+            dist/mushroom-cards-addition.js
+            dist/mushroom-cards-addition.js.map
+
+  hacs:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hacs/action@main
+        with:
+          category: plugin

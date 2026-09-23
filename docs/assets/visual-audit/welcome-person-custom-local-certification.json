@@ -1,0 +1,168 @@
+{
+  "upstreamCommit": "f8a9cb67a53f91367f1dffe18516aa983b463cb5",
+  "live": false,
+  "sources": {
+    "custom_card_paddy_waste_collection": {
+      "config": {
+        "entity": "sensor.afvalinfo_home_trash_type_today"
+      },
+      "interactions": [
+        {
+          "surface": "card surface",
+          "payload": {
+            "event": "hass-action",
+            "action": "tap",
+            "config": {
+              "entity": "sensor.afvalinfo_home_trash_type_today",
+              "tap_action": {
+                "action": "more-info"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "custom_card_paddy_welcome": {
+      "config": {
+        "entity": "person.joris",
+        "variant": "weather",
+        "time_entity": "sensor.time",
+        "weather_entity": "weather.hcn_ha"
+      },
+      "interactions": [
+        {
+          "surface": "card surface",
+          "payload": {
+            "event": "hass-action",
+            "action": "tap",
+            "config": {
+              "entity": "person.joris",
+              "tap_action": {
+                "action": "more-info"
+              }
+            }
+          }
+        },
+        {
+          "surface": "weather row",
+          "payload": {
+            "event": "hass-action",
+            "action": "tap",
+            "config": {
+              "entity": "weather.hcn_ha",
+              "tap_action": {
+                "action": "more-info"
+              }
+            }
+          }
+        }
+      ],
+      "unavailableIntegrations": [
+        "home-feed-card templating is not embedded; configured entity IDs render as a compact local feed."
+      ]
+    },
+    "custom_card_person_chip": {
+      "config": {
+        "entity": "person.joris",
+        "use_entity_picture": true
+      },
+      "interactions": [
+        {
+          "surface": "chip surface",
+          "payload": {
+            "event": "hass-action",
+            "action": "tap",
+            "config": {
+              "entity": "person.joris",
+              "tap_action": {
+                "action": "more-info"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "custom_card_playstation": {
+      "config": {
+        "entity": "media_player.office_joris_tv_2"
+      },
+      "interactions": [
+        {
+          "surface": "card surface",
+          "payload": {
+            "event": "hass-action",
+            "action": "tap",
+            "config": {
+              "entity": "media_player.office_joris_tv_2",
+              "tap_action": {
+                "action": "more-info"
+              }
+            }
+          }
+        }
+      ],
+      "unavailableIntegrations": [
+        "The mapped television entity may not expose PlayStation media_title or entity_picture attributes; idle/standby/artwork states are certified locally."
+      ]
+    },
+    "custom_card_qubino": {
+      "config": {
+        "entity": "switch.cv_plug"
+      },
+      "interactions": [
+        {
+          "surface": "card surface",
+          "payload": {
+            "event": "hass-action",
+            "action": "tap",
+            "config": {
+              "entity": "switch.cv_plug",
+              "tap_action": {
+                "action": "more-info"
+              }
+            }
+          }
+        }
+      ],
+      "unavailableIntegrations": [
+        "The mapped switch has no brightness attribute and no input_select.ordres_fil_pilote equivalent was supplied; live rendering would show Unavailable while the source brightness thresholds and dedicated more-info target are certified locally."
+      ]
+    },
+    "custom_card_ristou_person": {
+      "config": {
+        "entity": "person.joris",
+        "ulm_custom_card_ristou_use_entity_picture": true,
+        "ulm_custom_card_ristou_use_badge": true,
+        "battery_entity": "sensor.joris_mobile_battery_level"
+      },
+      "interactions": [
+        {
+          "surface": "card surface",
+          "payload": {
+            "event": "hass-action",
+            "action": "tap",
+            "config": {
+              "entity": "person.joris",
+              "tap_action": {
+                "action": "more-info"
+              }
+            }
+          }
+        },
+        {
+          "surface": "find-device button",
+          "payload": [
+            "homeassistant",
+            "toggle",
+            {
+              "entity_id": "script.find_joris_phone"
+            }
+          ]
+        }
+      ],
+      "unavailableIntegrations": [
+        "No driving sensor, find-device script, paired light/dark static-map cameras, or zone list was supplied by the live mapping; those optional states and payloads are certified locally."
+      ]
+    }
+  }
+}

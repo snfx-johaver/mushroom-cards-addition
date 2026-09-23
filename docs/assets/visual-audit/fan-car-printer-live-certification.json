@@ -1,0 +1,192 @@
+{
+  "certifiedAt": "2026-09-23T23:14:00+02:00",
+  "homeAssistant": {
+    "url": "http://192.168.1.4:8123",
+    "dashboard": "mushroom-addition-catalog",
+    "cardWidth": 330
+  },
+  "candidate": {
+    "commit": "00fbe45aca5d124fae448b5fc77520d32d26c9ec",
+    "resource": "/local/community/mushroom-cards-addition/mushroom-cards-addition.js?v=1.6.0-final-b71472b2",
+    "sha256": "B71472B20228456704FCA3BC688F372322C379D93BB0657B55F660467E7AAD40",
+    "bytes": 493024,
+    "backupSuffix": "20260923-231116"
+  },
+  "dashboard": {
+    "initialBackupSuffix": "20260923-231137",
+    "actionCorrectionBackupSuffix": "20260923-231300",
+    "cardCount": 85,
+    "replaced": 6,
+    "appended": 0
+  },
+  "sources": {
+    "custom_card_saxel_fan": {
+      "config": {
+        "entity": "fan.air_purifier",
+        "collapsable": true,
+        "ulm_card_fan_horizontal": false,
+        "ulm_show_button": true,
+        "ulm_button_service": "fan.oscillate",
+        "oscillate_attribute": "oscillate",
+        "tap_action": {
+          "action": "toggle"
+        },
+        "hold_action": {
+          "action": "more-info"
+        }
+      },
+      "renderedText": "Air purifier off",
+      "geometry": {
+        "width": 330,
+        "height": 69,
+        "scrollWidth": 330
+      },
+      "pickerRegistered": true,
+      "editorVerified": true,
+      "collapsedState": true,
+      "physicalActionsOperated": false,
+      "reason": "The purifier was off and the source collapsable behavior truthfully hid speed and oscillation controls; toggle/slider/oscillation were not operated.",
+      "screenshot": "live-final-six-mushroom-addition-custom-card-saxel-fan.png",
+      "liveAccepted": true
+    },
+    "custom_card_scenes": {
+      "config": {
+        "variant": "scene-grid",
+        "scene_items": [
+          {
+            "entity": "scene.living_room_relax",
+            "label": "Relax"
+          },
+          {
+            "entity": "scene.living_room_dimmed",
+            "label": "Dimmed"
+          }
+        ]
+      },
+      "renderedText": "Relax Dimmed",
+      "geometry": {
+        "width": 330,
+        "height": 108,
+        "scrollWidth": 330
+      },
+      "picker": {
+        "canonicalType": "mushroom-addition-card-scenes",
+        "registered": true,
+        "variant": "scene-grid"
+      },
+      "editorVerified": true,
+      "graphicalSceneEditor": {
+        "text": "Scene buttons Configure each button with a clear entity, label, icon, color, active state and action.",
+        "controls": [
+          "Remove",
+          "Add button"
+        ]
+      },
+      "sceneActionsOperated": false,
+      "screenshot": "live-final-six-mushroom-addition-custom-card-scenes.png",
+      "liveAccepted": true
+    },
+    "custom_card_schumijo_car": {
+      "config": {
+        "entity": "sensor.hn_etronq6_model",
+        "ulm_card_schumijo_car_tracker": "sensor.hn_etronq6_model",
+        "ulm_card_schumijo_car_lock": "binary_sensor.hn_etronq6_doors",
+        "ulm_card_schumijo_car_energy_level": "sensor.hn_etronq6_primary_engine_percent",
+        "ulm_card_schumijo_car_range": "sensor.hn_etronq6_range",
+        "ulm_card_schumijo_car_name": "HN e-tron Q6"
+      },
+      "renderedText": "HN-ETRONQ6 Model 243 minutes ago 30% Nível de energia 109km Alcance",
+      "geometry": {
+        "width": 330,
+        "height": 142,
+        "scrollWidth": 330
+      },
+      "pickerRegistered": true,
+      "editorVerified": true,
+      "safeInteraction": {
+        "action": "more-info",
+        "entity": "sensor.hn_etronq6_model"
+      },
+      "physicalActionsOperated": false,
+      "screenshot": "live-final-six-mushroom-addition-custom-card-schumijo-car.png",
+      "liveAccepted": true
+    },
+    "custom_card_schumijo_flower": {
+      "config": {
+        "entity": "sensor.frontyard_plants_soil_soil_humidity",
+        "ulm_card_flower_entity": "sensor.frontyard_plants_soil_soil_humidity",
+        "ulm_card_flower_name": "Frontyard soil",
+        "ulm_card_flower_show_bars": [
+          "moisture"
+        ]
+      },
+      "renderedText": "Frontyard plants soil Soil Humidity Correto",
+      "geometry": {
+        "width": 330,
+        "height": 98,
+        "scrollWidth": 330
+      },
+      "pickerRegistered": true,
+      "editorVerified": true,
+      "safeInteraction": {
+        "action": "more-info",
+        "entity": "sensor.frontyard_plants_soil_soil_humidity"
+      },
+      "screenshot": "live-final-six-mushroom-addition-custom-card-schumijo-flower.png",
+      "liveAccepted": true
+    },
+    "custom_card_senoro_win": {
+      "config": {
+        "entity": "binary_sensor.office_joris_window",
+        "tap_action": {
+          "action": "none"
+        }
+      },
+      "renderedText": "binary_sensor.office_joris_window Unavailable",
+      "geometry": {
+        "width": 330,
+        "height": 65,
+        "scrollWidth": 330
+      },
+      "pickerRegistered": true,
+      "editorVerified": true,
+      "safeInteraction": {
+        "action": "none",
+        "urlChanged": false
+      },
+      "limitation": "No required Closed/Tilted/Open handle-position sensor was supplied, so the truthful live state is Unavailable.",
+      "screenshot": "live-final-six-mushroom-addition-custom-card-senoro-win.png",
+      "liveAccepted": true
+    },
+    "custom_card_sisimomo_printer": {
+      "config": {
+        "entity": "binary_sensor.x1c_00m09d521700185_online",
+        "ulm_card_printer_name": "Bambu Lab X1C"
+      },
+      "renderedText": "X1C_00M09D521700185 Online on",
+      "geometry": {
+        "width": 330,
+        "height": 66,
+        "scrollWidth": 330
+      },
+      "pickerRegistered": true,
+      "editorVerified": true,
+      "safeInteraction": {
+        "action": "more-info",
+        "entity": "binary_sensor.x1c_00m09d521700185_online"
+      },
+      "physicalActionsOperated": false,
+      "limitation": "No valid 0-100 cartridge sensors were supplied, so no toner bars were invented.",
+      "screenshot": "live-final-six-mushroom-addition-custom-card-sisimomo-printer.png",
+      "liveAccepted": true
+    }
+  },
+  "result": {
+    "accepted": 6,
+    "overflowFailures": 0,
+    "pickerFailures": 0,
+    "editorFailures": 0,
+    "safeInteractionFailures": 0,
+    "physicalActionsOperated": 0
+  }
+}

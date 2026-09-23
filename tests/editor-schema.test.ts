@@ -1,0 +1,219 @@
+import { describe, expect, it } from "vitest";
+import { CATALOG } from "../src/catalog";
+import { editorSchemaFor } from "../src/editor-schema";
+import { editorHelper, localize } from "../src/localize";
+import { upstreamEditorSchemaFor } from "../src/editor-schema";
+
+describe("family editor schemas", () => {
+  it("uses one canonical primary entity selector in every card editor", () => {
+    for (const item of CATALOG) {
+      const schema = editorSchemaFor(item);
+      expect(schema.filter((field) => field.name === "entity")).toHaveLength(
+        item.family === "navigation" ||
+          item.upstreamId === "card_scenes" ||
+          (item.family === "text" &&
+            item.upstreamId !== "custom_card_homeassistant_updates" &&
+            item.upstreamId !== "custom_card_nik_clock" &&
+            item.upstreamId !== "custom_card_neekster_update")
+          ? 0
+          : 1,
+      );
+      expect(schema.some((field) => field.name === "primary_entity")).toBe(false);
+    }
+  });
+
+  it("gives weather unique, domain-filtered fields", () => {
+    const weather = CATALOG.find((item) => item.upstreamId === "card_weather")!;
+    const schema = editorSchemaFor(weather);
+    expect(schema.map((field) => field.name)).toEqual(expect.arrayContaining([
+      "entity", "temperature_entity", "humidity_entity", "show_forecast",
+    ]));
+    expect(schema).not.toContainEqual(expect.objectContaining({ name: "battery_entity" }));
+    expect(schema.find((field) => field.name === "entity")?.selector).toEqual({
+      entity: { domain: ["weather"] },
+    });
+  });
+
+  it("uses distinct schemas for every major family", () => {
+    const families = ["weather", "climate", "light", "scene", "presence", "battery", "energy", "sensor", "media", "cover", "vacuum", "security", "navigation"];
+    const signatures = families.map((family) => {
+      const item = CATALOG.find((entry) => entry.family === family)!;
+      return editorSchemaFor(item).map((field) => field.name).join(",");
+    });
+    expect(new Set(signatures).size).toBeGreaterThanOrEqual(9);
+  });
+
+  it("maps every registration to a known renderer/editor family", () => {
+    const supported = new Set([
+      "weather", "climate", "light", "scene", "presence", "battery", "energy",
+      "sensor", "media", "cover", "vacuum", "security", "navigation",
+      "text", "camera", "control", "alarm-time", "door", "entity", "bar",
+    ]);
+    for (const item of CATALOG) expect(supported.has(item.family)).toBe(true);
+  });
+
+  it("maps specialized cards to the correct primary domains", () => {
+    const byId = (id: string) => CATALOG.find((item) => item.upstreamId === id)!;
+    expect(byId("card_power_outlet")).toMatchObject({
+      family: "control",
+      preferredDomains: ["switch", "light"],
+    });
+
+    expect(byId("card_welcome_scenes").family).toBe("scene");
+    expect(byId("custom_card_alarm_time")).toMatchObject({
+      family: "alarm-time",
+      preferredDomains: ["input_boolean"],
+    });
+    expect(editorSchemaFor(byId("custom_card_alarm_time")).map((field) => field.name))
+      .toContain("datetime_entity");
+    expect(byId("custom_card_nik_door")).toMatchObject({
+      family: "door",
+      preferredDomains: ["sensor", "binary_sensor"],
+    });
+    expect(editorSchemaFor(byId("custom_card_nik_door")).map((field) => field.name))
+      .toEqual(expect.arrayContaining(["lock_entity", "battery_entity"]));
+  });
+
+  it("uses semantic Person Info selectors without duplicating the primary person", () => {
+    const person = CATALOG.find((item) => item.upstreamId === "custom_card_person_info")!;
+    const core = editorSchemaFor(person, { type: `custom:${person.tag}`, variant: "small" });
+    const advanced = upstreamEditorSchemaFor(person);
+    expect(core.find((field) => field.name === "entity")?.selector).toEqual({
+      entity: { domain: ["person"] },
+    });
+
+    expect(advanced.some((field) => field.name === "ulm_card_person_entity")).toBe(false);
+    expect(core.find((field) => field.name === "ulm_card_person_zone1")?.selector).toEqual({
+      entity: { domain: ["zone"] },
+    });
+    expect(core.find((field) => field.name === "ulm_card_person_battery_entity")?.selector).toEqual({
+      entity: { domain: ["sensor"] },
+    });
+  });
+
+  it("keeps update and tablet selectors canonical and executable", () => {
+    const updates = CATALOG.find((item) => item.upstreamId === "custom_card_homeassistant_updates")!;
+    expect(upstreamEditorSchemaFor(updates).some((field) => field.name === "ulm_card_homeassistant_entity")).toBe(false);
+    const tablet = CATALOG.find((item) => item.upstreamId === "custom_card_nik_tablet")!;
+    const schema = editorSchemaFor(tablet);
+    expect(schema.find((field) => field.name === "tablet_button_motion_entity")?.selector).toEqual({
+      entity: { domain: ["switch", "input_boolean"] },
+    });
+    expect(schema.find((field) => field.name === "tablet_button_display_entity")?.selector).toEqual({
+      entity: { domain: ["light", "switch", "input_boolean"] },
+    });
+  });
+
+  it("exposes clear welcome-scene collapse controls", () => {
+    const welcome = CATALOG.find((item) => item.upstreamId === "card_welcome_scenes")!;
+    expect(editorSchemaFor(welcome).map((field) => field.name)).toEqual(expect.arrayContaining([
+      "collapse_entity", "collapsed",
+    ]));
+  });
+
+  it("gives every advanced editor option a user-friendly label and explanation", () => {
+    for (const item of CATALOG) {
+      for (const field of upstreamEditorSchemaFor(item)) {
+        const label = localize(undefined, field.name);
+        expect(label).not.toMatch(/\bUlm\b/i);
+        expect(label).not.toContain("_");
+        expect(label).not.toMatch(/\bEnable\b/i);
+        expect(editorHelper(field.name)).toBeTruthy();
+        expect(editorHelper(field.name)).not.toMatch(/\bulm\b/i);
+      }
+    }
+  });
+
+  it("explains every standard editor field", () => {
+    const selfExplanatory = new Set(["entities"]);
+    for (const item of CATALOG) {
+      for (const field of editorSchemaFor(item)) {
+        if (!selfExplanatory.has(field.name)) expect(editorHelper(field.name)).toBeTruthy();
+      }
+    }
+  });
+
+  it("uses dropdowns for finite weather choices and percentage sliders for ranges", () => {
+    const weather = CATALOG.find((item) => item.upstreamId === "card_weather")!;
+    const weatherFields = upstreamEditorSchemaFor(weather);
+    expect(weatherFields.find((field) => field.name === "ulm_card_weather_primary_info")?.selector)
+      .toMatchObject({ select: { mode: "dropdown" } });
+    expect(weatherFields.find((field) => field.name === "ulm_card_weather_secondary_info")?.selector)
+      .toMatchObject({ select: { mode: "dropdown" } });
+
+    const light = CATALOG.find((item) => item.upstreamId === "card_light")!;
+    expect(upstreamEditorSchemaFor(light)
+      .find((field) => field.name === "ulm_card_light_brightness_medium")?.selector)
+      .toEqual({ number: { min: 0, max: 100, step: 1, mode: "slider", unit_of_measurement: "%" } });
+  });
+
+  it("provides Mushroom-style presentation controls on every card editor", () => {
+    const expected = [
+      "name_mode", "name", "icon", "icon_type", "layout",
+      "fill_container", "primary_info", "secondary_info",
+    ];
+    for (const item of CATALOG.filter((entry) => entry.kind === "card")) {
+      const schema = editorSchemaFor(item);
+      expect(schema.map((field) => field.name)).toEqual(expect.arrayContaining(expected));
+      for (const name of ["name_mode", "icon_type", "layout", "primary_info", "secondary_info"]) {
+        expect(schema.find((field) => field.name === name)?.selector).toHaveProperty("select");
+      }
+    }
+  });
+
+  it("shows only controls relevant to the selected unified variant", () => {
+    const personInfo = CATALOG.find((item) => item.upstreamId === "custom_card_person_info")!;
+    const full = editorSchemaFor(personInfo, { type: `custom:${personInfo.tag}`, variant: "full" });
+    const small = editorSchemaFor(personInfo, { type: `custom:${personInfo.tag}`, variant: "small" });
+    expect(full.map((field) => field.name)).toContain("ulm_card_person_commute_entity");
+    expect(full.map((field) => field.name)).toContain("ulm_card_person_zone1");
+    expect(small.map((field) => field.name)).toContain("ulm_card_person_zone1");
+    expect(small.map((field) => field.name)).not.toContain("ulm_card_person_commute_entity");
+    expect(full.find((field) => field.name === "entity")?.selector).toEqual({
+      entity: { domain: ["person"] },
+    });
+
+    const weather = CATALOG.find((item) => item.upstreamId === "card_weather")!;
+    expect(upstreamEditorSchemaFor(weather, { type: `custom:${weather.tag}`, variant: "detailed" }).length)
+      .toBeGreaterThan(0);
+    expect(upstreamEditorSchemaFor(weather, { type: `custom:${weather.tag}`, variant: "native" }))
+      .toHaveLength(0);
+  });
+
+  it("gives Bar Card only its source-specific controls", () => {
+    const bar = CATALOG.find((item) => item.upstreamId === "custom_card_bar_card")!;
+    expect(bar.family).toBe("bar");
+    const core = editorSchemaFor(bar).map((field) => field.name);
+    expect(core).not.toEqual(expect.arrayContaining(["show_graph", "min_entity", "max_entity"]));
+    expect(upstreamEditorSchemaFor(bar).map((field) => field.name)).toEqual(expect.arrayContaining([
+      "ulm_custom_card_bar_card_color",
+      "ulm_custom_card_bar_card_icon",
+      "ulm_custom_card_bar_card_icon_color",
+      "ulm_custom_card_bar_card_indicator",
+      "ulm_custom_card_bar_card_min",
+      "ulm_custom_card_bar_card_max",
+      "ulm_custom_card_bar_card_name",
+      "ulm_custom_card_bar_card_show_icon",
+      "ulm_custom_card_bar_card_value",
+    ]));
+  });
+
+  it("gives Waste Collection semantic stream controls without graph settings", () => {
+    const waste = CATALOG.find((item) => item.upstreamId === "custom_card_afvalophaling")!;
+    const core = editorSchemaFor(waste);
+    expect(core.find((field) => field.name === "entity")?.selector).toEqual({
+      entity: { domain: ["sensor", "calendar"] },
+    });
+    expect(core.find((field) => field.name === "today_entity")?.selector).toEqual({
+      entity: { domain: ["sensor"] },
+    });
+    expect(core.find((field) => field.name === "tomorrow_entity")?.selector).toEqual({
+      entity: { domain: ["sensor"] },
+    });
+    expect(core.map((field) => field.name)).toEqual(expect.arrayContaining([
+      "show_today",
+      "show_tomorrow",
+    ]));
+    expect(core.map((field) => field.name)).not.toContain("show_graph");
+  });
+});

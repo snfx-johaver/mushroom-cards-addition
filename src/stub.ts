@@ -1,0 +1,614 @@
+import type { AdditionConfig, CatalogItem, HomeAssistant } from "./types";
+import { populatedDefaultsFor } from "./defaults";
+
+const firstMatchingEntity = (
+  descriptor: CatalogItem,
+  hass?: HomeAssistant,
+  entities: string[] = [],
+  entitiesFallback: string[] = [],
+): string | undefined => {
+  const available = [...entities, ...entitiesFallback, ...Object.keys(hass?.states ?? {})];
+  const unique = [...new Set(available)].filter((entityId) => hass?.states?.[entityId] !== undefined);
+  for (const domain of descriptor.preferredDomains ?? []) {
+    const found = unique.find((entityId) => entityId.startsWith(`${domain}.`));
+    if (found) return found;
+  }
+  return unique[0];
+};
+
+const sampleName = (descriptor: CatalogItem): string =>
+  descriptor.name.replace(/ (Card|Chip)$/, "");
+
+export const createStubConfig = (
+  descriptor: CatalogItem,
+  hass?: HomeAssistant,
+  entities: string[] = [],
+  entitiesFallback: string[] = [],
+): AdditionConfig => {
+  const available = [...new Set([...entities, ...entitiesFallback, ...Object.keys(hass?.states ?? {})])]
+    .filter((entityId) => hass?.states?.[entityId] !== undefined);
+  const findEntity = (domains: string[], terms: string[]): string | undefined =>
+    available.find((entityId) =>
+      domains.some((domain) => entityId.startsWith(`${domain}.`)) &&
+      terms.every((term) => entityId.toLowerCase().includes(term)));
+  const findEntityExcluding = (domains: string[], terms: string[], excludedTerms: string[]): string | undefined =>
+    available.find((entityId) =>
+      domains.some((domain) => entityId.startsWith(`${domain}.`)) &&
+      terms.every((term) => entityId.toLowerCase().includes(term)) &&
+      excludedTerms.every((term) => !entityId.toLowerCase().includes(term)));
+  const semanticPrimary =
+    descriptor.upstreamId === "card_title"
+      ? undefined
+      : descriptor.upstreamId === "card_vertical_button"
+        ? findEntity(["light"], []) ??
+          findEntity(["switch", "input_boolean", "fan", "vacuum", "script", "button", "lock"], [])
+      : descriptor.upstreamId === "card_generic"
+      ? findEntity(["sensor"], ["bedroom", "temperature"])
+      : descriptor.upstreamId === "card_graph"
+        ? findEntity(["sensor"], ["cv", "plug", "power"])
+        : descriptor.upstreamId === "card_light"
+          ? findEntity(["light"], ["joris", "iris"])
+          : descriptor.upstreamId === "card_media_player"
+            ? findEntity(["media_player"], ["office", "joris", "tv"])
+            : descriptor.upstreamId === "card_battery"
+              ? findEntityExcluding(["sensor"], ["battery", "level"], ["state", "charging"])
+              : descriptor.upstreamId === "card_binary_sensor"
+                ? findEntity(["binary_sensor"], ["all", "doors"]) ?? findEntity(["binary_sensor"], ["door"])
+                : descriptor.upstreamId === "card_cover"
+                  ? findEntity(["cover"], ["sunscreen"])
+                  : descriptor.upstreamId === "card_fan"
+                    ? findEntity(["fan"], ["air", "purifier"])
+                    : descriptor.upstreamId === "card_input_boolean"
+                      ? findEntity(["input_boolean"], ["dropdown", "welcome"])
+                      : descriptor.upstreamId === "custom_card_mpse_wifisignal"
+                        ? findEntity(["sensor"], ["signal", "strength"])
+                      : descriptor.upstreamId === "custom_card_nas"
+                        ? findEntity(["sensor"], ["nas", "status"]) ?? findEntity(["sensor"], ["nas"])
+                      : descriptor.upstreamId === "custom_card_neekster_update"
+                        ? findEntity(["update"], ["home", "assistant", "core"]) ?? findEntity(["update"], [])
+                      : descriptor.upstreamId === "custom_card_nik_clock"
+                        ? findEntity(["sensor"], ["time"])
+                      : descriptor.upstreamId === "custom_card_nik_door"
+                        ? findEntity(["binary_sensor", "sensor"], ["all", "doors"]) ??
+                          findEntity(["binary_sensor", "sensor"], ["door"])
+                      : descriptor.upstreamId === "custom_card_paddy_dwd_pollen"
+                        ? findEntity(["sensor"], ["pollen", "grass", "level"]) ??
+                          findEntity(["sensor"], ["pollen", "grass"]) ??
+                          findEntity(["sensor"], ["pollen"])
+                        : descriptor.upstreamId === "custom_card_wsly_pollen"
+                          ? findEntity(["sensor"], ["pollen", "grass"])
+                        : descriptor.upstreamId === "custom_card_yagrasdemonde_lights_count"
+                          ? findEntity(["sensor"], ["number", "lights", "on"]) ??
+                            findEntity(["sensor"], ["lights", "on"])
+                        : descriptor.upstreamId === "custom_card_speedtest_shogun160"
+                          ? findEntity(["sensor"], ["speedtest", "download"]) ??
+                              findEntity(["sensor"], ["download"])
+                          : descriptor.upstreamId === "custom_card_tpx01_aircondition"
+                            ? findEntity(["climate"], [])
+                            : descriptor.upstreamId === "custom_card_vncntdev_device_tracer"
+                              ? findEntity(["device_tracker", "switch"], [])
+                              : descriptor.upstreamId === "custom_card_water_heater"
+                                ? findEntity(["water_heater"], [])
+                        : descriptor.upstreamId === "custom_card_nik_tablet"
+                          ? findEntity(["binary_sensor", "sensor", "switch"], ["tablet"])
+                        : descriptor.upstreamId === "custom_card_homeassistant_updates"
+                          ? findEntity(["update", "sensor", "binary_sensor"], ["core"])
+                          : descriptor.upstreamId === "custom_card_nik_nas"
+                            ? findEntity(["switch", "binary_sensor"], ["nas"]) ??
+                                findEntity(["switch", "binary_sensor"], ["status"])
+                              : descriptor.upstreamId === "custom_card_haven_washer"
+                                ? findEntity(["sensor"], ["operation", "state"]) ??
+                                  findEntity(["sensor"], ["washer", "state"])
+                                : descriptor.upstreamId === "custom_card_httpedo13_sun"
+                                  ? findEntity(["sun"], [])
+                                  : descriptor.upstreamId === "custom_card_httpedo13_thermostat"
+                                    ? findEntity(["climate"], [])
+                                    : descriptor.upstreamId === "custom_card_iAbadia_battery_chip"
+                                      ? findEntity(["sensor"], ["battery", "level"]) ??
+                                        findEntity(["sensor"], ["battery"])
+                                      : descriptor.upstreamId === "custom_card_imswel_medias"
+                                        ? findEntity(["media_player", "sensor"], ["sonos"]) ??
+                                          findEntity(["media_player", "sensor"], ["media"])
+                                      : descriptor.upstreamId === "custom_card_media_player_sonos"
+                                        ? findEntity(["media_player"], ["sonos"])
+                                      : descriptor.upstreamId === "custom_card_more_power_outlet"
+                                        ? findEntity(["switch", "light"], ["outlet"]) ??
+                                          findEntity(["switch", "light"], ["plug"])
+                                      : descriptor.upstreamId === "custom_card_mpse_printer"
+                                        ? findEntity(["sensor", "binary_sensor"], ["printer"]) ??
+                                          findEntity(["sensor", "binary_sensor"], ["online"])
+                                      : descriptor.upstreamId === "custom_card_mpse_thermostat"
+                                        ? findEntity(["climate"], [])
+                              : descriptor.upstreamId === "custom_card_irmajavi_speedtest"
+                                ? findEntity(["sensor"], ["download"])
+                              : descriptor.upstreamId === "card_room"
+                                ? findEntity(["light"], [])
+                                : descriptor.upstreamId === "custom_card_saxel_fan"
+                                  ? findEntity(["fan"], ["air", "purifier"]) ?? findEntity(["fan"], [])
+                                  : descriptor.upstreamId === "custom_card_schumijo_car"
+                                    ? findEntity(["sensor"], ["model"]) ?? findEntity(["device_tracker"], [])
+                                    : descriptor.upstreamId === "custom_card_schumijo_flower"
+                                      ? findEntity(["plant"], []) ?? findEntity(["sensor"], ["soil", "humidity"])
+                                      : descriptor.upstreamId === "custom_card_senoro_win"
+                                        ? findEntity(["binary_sensor"], ["window"]) ?? findEntity(["binary_sensor"], [])
+                                        : descriptor.upstreamId === "custom_card_sisimomo_printer"
+                                          ? findEntity(["binary_sensor", "sensor"], ["printer"]) ??
+                                            findEntity(["binary_sensor", "sensor"], ["online"])
+                                : descriptor.upstreamId === "custom_card_paddy_waste_collection"
+                                  ? findEntity(["sensor"], ["trash", "today"]) ?? findEntity(["sensor"], ["waste"])
+                                  : descriptor.upstreamId === "custom_card_paddy_welcome" ||
+                                      descriptor.upstreamId === "custom_card_person_chip" ||
+                                      descriptor.upstreamId === "custom_card_ristou_person"
+                                    ? findEntity(["person"], [])
+                                    : descriptor.upstreamId === "custom_card_playstation"
+                                      ? findEntity(["media_player"], ["tv"]) ?? findEntity(["media_player"], [])
+                                      : descriptor.upstreamId === "custom_card_qubino"
+                                        ? findEntity(["light"], []) ?? findEntity(["switch"], ["cv", "plug"])
+                                : undefined;
+  const entity = descriptor.upstreamId === "custom_card_input_number"
+    ? available.find((entityId) =>
+      descriptor.preferredDomains?.some((domain) => entityId.startsWith(`${domain}.`)))
+    : descriptor.upstreamId === "card_scenes" || descriptor.upstreamId === "card_title"
+      ? undefined
+      : semanticPrimary ?? firstMatchingEntity(descriptor, hass, entities, entitiesFallback);
+  const isText = ["text", "navigation"].includes(descriptor.family);
+  const defaultVariant = descriptor.variants?.[0];
+  const entityDomain = entity?.split(".", 1)[0];
+  const tapAction = ["light", "switch", "input_boolean", "fan"].includes(entityDomain ?? "")
+    ? { action: "toggle" }
+    : { action: entity ? "more-info" : "none" };
+  return {
+    ...populatedDefaultsFor(descriptor, hass, entity),
+    name: entity ? hass?.states[entity]?.attributes.friendly_name : sampleName(descriptor),
+    secondary: entity ? undefined : isText ? "Example" : "Preview",
+    variant: defaultVariant,
+    tap_action: tapAction,
+    show_controls: ["climate", "cover", "vacuum", "control"].includes(descriptor.family) ||
+      (descriptor.family === "media" && descriptor.upstreamId !== "card_media_player")
+      ? true
+      : undefined,
+    show_forecast: descriptor.family === "weather",
+    show_graph: ["battery", "energy", "sensor"].includes(descriptor.family),
+    ulm_card_cover_enable_controls: descriptor.upstreamId === "card_cover" ? true : undefined,
+    ulm_card_cover_enable_slider: descriptor.upstreamId === "card_cover" ? true : undefined,
+    ulm_card_fan_enable_slider: descriptor.upstreamId === "card_fan" ? true : undefined,
+    ulm_card_fan_enable_button: descriptor.upstreamId === "card_fan" ? true : undefined,
+    ulm_custom_card_bar_card_value: descriptor.family === "bar" ? true : undefined,
+    entities: descriptor.variants?.includes("with-sensors")
+      ? entitiesFallback.slice(0, 2)
+      : undefined,
+    ...(descriptor.upstreamId === "card_navigate"
+      ? {
+        navigation_path: "/config/updates",
+        tap_action: { action: "navigate", navigation_path: "/config/updates" },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_homeassistant_updates"
+      ? {
+        ulm_card_homeassistant_core: findEntity(["update", "sensor", "binary_sensor"], ["core"]) ?? entity,
+        ulm_card_homeassistant_supervisor: findEntity(["update", "sensor", "binary_sensor"], ["supervisor"]),
+        ulm_card_homeassistant_os: findEntity(["update", "sensor", "binary_sensor"], ["operating", "system"]) ??
+          findEntity(["update", "sensor", "binary_sensor"], ["os"]),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_haven_washer"
+      ? {
+        power_entity: findEntity(["sensor", "switch"], ["wasmachine", "power"]) ??
+          findEntity(["sensor", "switch"], ["washer", "power"]) ??
+          findEntity(["sensor", "switch"], ["power"]),
+        door_entity: findEntity(["sensor", "binary_sensor"], ["washer", "door"]) ??
+          findEntity(["sensor", "binary_sensor"], ["door"]),
+        finished_entity: findEntity(["sensor", "binary_sensor"], ["washer", "finished"]) ??
+          findEntity(["sensor", "binary_sensor"], ["finished"]),
+        ulm_custom_card_washer_machine_state: entity,
+        ulm_custom_card_washer_machine_stop_state: "stop",
+        ulm_custom_card_washer_label_idle: "idle",
+        ulm_custom_card_washer_label_configuring: "configure",
+        ulm_custom_card_washer_label_running: "run",
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_httpedo13_sun"
+      ? {
+        darkMode: false,
+        language: hass?.language ?? "en",
+        showAzimuth: false,
+        showElevation: false,
+        timeFormat: "24h",
+        tap_action: { action: "none" },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_httpedo13_thermostat"
+      ? {
+        variant: "buttons",
+        tap_action: { action: "none" },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_iAbadia_battery_chip"
+      ? {
+        battery_state_entity: findEntity(["sensor", "binary_sensor"], ["battery", "state"]),
+        charger_type_entity: findEntity(["sensor"], ["charger", "type"]),
+        ulm_custom_card_iAbadia_battery_chip_entity: entity,
+        ulm_custom_card_iAbadia_battery_chip_warning: 20,
+        ulm_custom_card_iAbadia_battery_chip_danger: 10,
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_imswel_medias"
+      ? {
+        secondary_entity: findEntity(["media_player", "sensor"], ["tv"]),
+        variant: entity?.includes("radarr") || entity?.includes("sonarr") ? "upcoming" : "library",
+        ulm_custom_card_imswel_medias_index: 1,
+        ulm_custom_card_imswel_medias_platform: entity?.includes("sonarr")
+          ? "sonarr"
+          : entity?.includes("radarr") ? "radarr" : "plex",
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_nas"
+      ? {
+        ulm_custom_card_nas_sensor: entity,
+        ulm_custom_card_nas_text: "NAS status",
+        ulm_custom_card_nas_unit: "",
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_neekster_update"
+      ? {
+        ulm_card_neekster_update_enable_controls: true,
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_nik_clock"
+      ? {
+        date_entity: findEntity(["sensor"], ["date", "time"]) ?? findEntity(["sensor"], ["date"]),
+        tap_action: undefined,
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_paddy_dwd_pollen"
+      ? {
+        entity: findEntity(["sensor"], ["pollen", "grass", "level"]) ?? entity,
+        level_entity: findEntity(["sensor"], ["pollen", "grass", "level"]),
+        pollen_language: "en",
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_nik_tablet"
+      ? {
+        tablet_button_usb_entity: findEntity(["switch", "input_boolean"], ["tablet", "usb"]),
+        tablet_button_motion_entity: findEntity(["switch", "input_boolean"], ["tablet", "motion"]),
+        tablet_button_display_entity: findEntity(["light", "switch", "input_boolean"], ["tablet", "display"]),
+        tablet_restart_entity: findEntity(["button"], ["tablet", "restart"]),
+        tablet_maintenance_entity: findEntity(["switch", "input_boolean"], ["tablet", "maintenance"]),
+        tablet_reload_entity: findEntity(["button"], ["tablet", "reload"]),
+        tablet_ram_entity: findEntity(["sensor"], ["tablet", "ram"]),
+        tablet_disk_entity: findEntity(["sensor"], ["tablet", "disk"]),
+        tablet_power_entity: findEntity(["sensor", "binary_sensor", "switch"], ["tablet", "power"]),
+        battery_entity: findEntity(["sensor"], ["tablet", "battery"]),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_nik_nas"
+      ? {
+        disk_entity: findEntity(["sensor"], ["nas", "disk"]) ?? findEntity(["sensor"], ["disk"]),
+        disk_name: "Disk",
+        disk_icon: "mdi:harddisk",
+        disk_color: "red",
+        temperature_entity: findEntity(["sensor"], ["nas", "temp"]) ?? findEntity(["sensor"], ["temperature"]),
+        temperature_name: "Temp",
+        temperature_icon: "mdi:thermometer",
+        temperature_color: "orange",
+        temperature_max: 100,
+        memory_entity: findEntity(["sensor"], ["nas", "memory"]) ?? findEntity(["sensor"], ["memory"]),
+        memory_name: "Memory",
+        memory_icon: "mdi:memory",
+        memory_color: "blue",
+        memory_max: 100,
+        cpu_entity: findEntity(["sensor"], ["nas", "cpu"]) ?? findEntity(["sensor"], ["cpu"]),
+        cpu_name: "CPU",
+        cpu_icon: "mdi:cpu-64-bit",
+        cpu_color: "green",
+        cpu_max: 100,
+        graph_span: "1d",
+        chart_type: "radialBar",
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_device_tracker"
+      ? {
+        ulm_custom_card_device_tracker_tracker_1_entity:
+          findEntity(["device_tracker"], ["wifi"]) ?? findEntity(["device_tracker"], ["phone"]) ?? entity,
+        ulm_custom_card_device_tracker_tracker_1_type: "lan",
+        ulm_custom_card_device_tracker_tracker_2_entity:
+          findEntity(["device_tracker"], ["bluetooth"]) ?? findEntity(["device_tracker"], ["ble"]),
+        ulm_custom_card_device_tracker_tracker_2_type: "bluetooth",
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_speedtest_shogun160"
+      ? {
+        download_entity: findEntity(["sensor"], ["speedtest", "download"]) ??
+          findEntity(["sensor"], ["download"]) ?? entity,
+        upload_entity: findEntity(["sensor"], ["speedtest", "upload"]) ??
+          findEntity(["sensor"], ["upload"]),
+        ping_entity: findEntity(["sensor"], ["speedtest", "ping"]) ??
+          findEntity(["sensor"], ["ping"]),
+        tap_action: {
+          action: "perform-action",
+          perform_action: "homeassistant.update_entity",
+          target: {
+            entity_id: [
+              findEntity(["sensor"], ["speedtest", "download"]) ?? findEntity(["sensor"], ["download"]) ?? entity,
+              findEntity(["sensor"], ["speedtest", "upload"]) ?? findEntity(["sensor"], ["upload"]),
+              findEntity(["sensor"], ["speedtest", "ping"]) ?? findEntity(["sensor"], ["ping"]),
+            ].filter((value): value is string => Boolean(value)),
+          },
+        },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_vncntdev_device_tracer"
+      ? {
+        custom_card_vncntdev_device_tracker_name:
+          entity ? hass?.states[entity]?.attributes.friendly_name : undefined,
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_water_heater"
+      ? {
+        power_entity: findEntity(["sensor"], ["water", "heater", "power"]) ??
+          findEntity(["sensor"], ["boiler", "power"]),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_drealine_roomview"
+      ? {
+        entity: undefined,
+        group_lights: findEntity(["group", "light"], ["lights"]),
+        group_motions: findEntity(["group", "binary_sensor"], ["motions"]),
+        group_doors: findEntity(["group", "binary_sensor"], ["doors"]),
+        group_windows: findEntity(["group", "binary_sensor"], ["windows"]),
+        group_outlets: findEntity(["group", "switch"], ["outlets"]),
+        group_tv: findEntity(["group", "media_player"], ["tv"]),
+        group_water: findEntity(["group", "binary_sensor"], ["water"]),
+        group_windows_shutters: findEntity(["group", "cover"], ["shutters"]),
+        temperature: findEntity(["sensor"], ["room", "temperature"]) ?? findEntity(["sensor"], ["temperature"]),
+        humidity: findEntity(["sensor"], ["room", "humidity"]) ?? findEntity(["sensor"], ["humidity"]),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_eraycetinay_lock"
+      ? {
+        ulm_custom_card_eraycetinay_lock_battery_level: findEntity(["sensor", "binary_sensor"], ["lock", "battery"]),
+        ulm_custom_card_eraycetinay_lock_door_open: findEntity(["binary_sensor"], ["door"]),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_esh_room"
+      ? {
+        ulm_custom_card_esh_room_light_entity: findEntity(["light"], ["room"]) ?? findEntity(["light"], []),
+        ulm_custom_card_esh_room_climate_entity: findEntity(["climate"], ["room"]) ?? findEntity(["climate"], []),
+        ulm_custom_card_esh_room_cover_entity: findEntity(["cover"], ["room"]) ?? findEntity(["cover"], []),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_esh_welcome"
+      ? {
+        ulm_card_esh_welcome_collapse: findEntity(["input_boolean"], ["welcome"]),
+        ulm_weather: findEntity(["weather"], []),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_wsly_pollen"
+      ? {
+        trees_entity: findEntity(["sensor"], ["pollen", "trees"]) ??
+          findEntity(["sensor"], ["tree", "pollen"]),
+        grass_entity: findEntity(["sensor"], ["pollen", "grass"]) ??
+          findEntity(["sensor"], ["grass", "pollen"]) ?? entity,
+        weeds_entity: findEntity(["sensor"], ["pollen", "weeds"]) ??
+          findEntity(["sensor"], ["weed", "pollen"]),
+        tap_action: { action: "none" },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_yagrasdemonde_lights_count"
+      ? {
+        ulm_custom_card_yagrasdemonde_lights_count_type: "light",
+        tap_action: { action: "none" },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_person_info"
+      ? {
+        ulm_card_person_driving_entity: findEntity(["binary_sensor"], ["person", "driving"]),
+        ulm_card_person_battery_entity: findEntityExcluding(["sensor"], ["person", "battery"], ["state"]),
+        ulm_card_person_battery_state_entity: findEntity(["sensor", "binary_sensor"], ["person", "battery", "state"]),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_saxel_fan"
+      ? {
+        entity,
+        tap_action: { action: "toggle" },
+        hold_action: { action: "more-info" },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_schumijo_car"
+      ? {
+        entity,
+        ulm_card_schumijo_car_tracker: entity,
+        ulm_card_schumijo_car_lock:
+          findEntity(["lock"], ["car"]) ?? findEntity(["binary_sensor"], ["doors"]),
+        ulm_card_schumijo_car_energy_level:
+          findEntity(["sensor"], ["primary", "engine", "percent"]) ?? findEntity(["sensor"], ["battery"]),
+        ulm_card_schumijo_car_range: findEntity(["sensor"], ["range"]),
+        ulm_card_schumijo_car_name: entity ? hass?.states[entity]?.attributes.friendly_name : undefined,
+        tap_action: { action: "more-info" },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_schumijo_flower"
+      ? {
+        entity,
+        ulm_card_flower_entity: entity,
+        ulm_card_flower_name: entity ? hass?.states[entity]?.attributes.friendly_name : "No name set",
+        ulm_card_flower_show_bars: ["temperature", "humidity", "moisture"],
+        tap_action: { action: "more-info" },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_senoro_win"
+      ? {
+        entity,
+        ulm_custom_card_senoro_win_entity: entity,
+        ulm_custom_card_senoro_win_handle: findEntity(["sensor"], ["window", "handle"]) ??
+          findEntity(["sensor"], ["handle"]),
+        ulm_custom_card_senoro_win_battery_level: findEntity(["sensor"], ["window", "battery"]) ??
+          findEntity(["sensor"], ["battery"]),
+        tap_action: { action: "none" },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_sisimomo_printer"
+      ? {
+        entity,
+        ulm_card_printer_name: entity ? hass?.states[entity]?.attributes.friendly_name : "Printer",
+        tap_action: { action: "none" },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "card_person"
+      ? {
+        battery_entity: findEntity(["sensor"], ["battery"]),
+        use_entity_picture: Boolean(entity && hass?.states[entity]?.attributes.entity_picture),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "card_power_outlet"
+      ? {
+        consumption_entity: findEntity(["sensor"], ["power"]),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "card_room"
+      ? {
+        room_sensors: [
+          findEntity(["sensor"], ["illuminance"]),
+          findEntity(["sensor"], ["temperature"]),
+        ]
+          .filter((entityId): entityId is string => Boolean(entityId))
+          .map((entityId) => ({ entity: entityId })),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "card_scenes"
+      ? {
+        scene_items: available
+          .filter((entityId) => entityId.startsWith("scene."))
+          .slice(0, 7)
+          .map((entityId) => ({ entity: entityId })),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "card_thermostat"
+      ? {
+        show_controls: true,
+        ulm_card_thermostat_enable_controls: true,
+        ulm_card_thermostat_enable_display_temperature: true,
+      }
+      : {}),
+    ...(descriptor.upstreamId === "card_title"
+      ? {
+        name: "Living room",
+        secondary: "Lights and climate",
+        tap_action: { action: "none" },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "card_vertical_button"
+      ? {
+        icon: undefined,
+        ulm_card_vertical_button_color: "blue",
+        ulm_card_vertical_button_state: "on",
+      }
+      : {}),
+    ...(descriptor.upstreamId === "card_weather"
+      ? {
+        show_forecast: defaultVariant !== "native",
+        ulm_card_weather_primary_info: "extrema",
+        ulm_card_weather_secondary_info: "precipitation",
+      }
+      : {}),
+    ...(descriptor.upstreamId === "card_welcome_scenes"
+      ? {
+        name: undefined,
+        secondary: "Scenes",
+        collapse_entity: findEntity(["input_boolean"], ["collapse"]) ??
+          findEntity(["input_boolean"], ["dropdown"]) ??
+          findEntity(["input_boolean"], []),
+        scene_items: available
+          .filter((entityId) => entityId.startsWith("scene."))
+          .slice(0, 5)
+          .map((entityId) => ({ entity: entityId })),
+        tap_action: { action: "none" },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_imswel_person"
+      ? {
+        wifi_tracker_entity: findEntity(["device_tracker"], ["wifi"]),
+        gps_tracker_entity: findEntity(["device_tracker"], ["gps"]),
+        findmy_script_entity: findEntity(["script"], ["find"]),
+        battery_entity: findEntityExcluding(["sensor"], ["battery"], ["state"]),
+        use_entity_picture: false,
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_irmajavi_speedtest"
+      ? {
+        download_entity: findEntity(["sensor"], ["download"]) ?? entity,
+        upload_entity: findEntity(["sensor"], ["upload"]),
+        ping_entity: findEntity(["sensor"], ["ping"]),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_light_colorpick"
+      ? {
+        ulm_card_light_colorpick_name: entity
+          ? hass?.states[entity]?.attributes.friendly_name
+          : sampleName(descriptor),
+        ulm_card_light_colorpick_transition: 1,
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_media_player_sonos"
+      ? {
+        ulm_card_media_player_with_controls_name: entity
+          ? hass?.states[entity]?.attributes.friendly_name
+          : "No name set",
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_more_power_outlet"
+      ? {
+        power_entity: findEntity(["sensor"], ["power"]),
+        energy_entity: findEntity(["sensor"], ["energy"]),
+        time_entity: findEntity(["sensor"], ["time"]),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_mpse_gauge"
+      ? { minimum: 0, maximum: 100 }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_mpse_printer"
+      ? {
+        black_entity: findEntity(["sensor"], ["black"]),
+        yellow_entity: findEntity(["sensor"], ["yellow"]),
+        magenta_entity: findEntity(["sensor"], ["magenta"]),
+        cyan_entity: findEntity(["sensor"], ["cyan"]),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_paddy_welcome"
+      ? {
+        variant: findEntity(["weather"], []) ? "weather" : "message",
+        time_entity: findEntity(["sensor"], ["time"]),
+        weather_entity: findEntity(["weather"], []),
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_person_chip"
+      ? {
+        use_entity_picture: true,
+        tap_action: { action: entity ? "more-info" : "none", entity },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_playstation"
+      ? {
+        show_controls: false,
+        tap_action: { action: entity ? "more-info" : "none", entity },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_qubino"
+      ? {
+        qubino_more_info_entity: findEntity(["input_select"], ["ordres", "fil", "pilote"]),
+        tap_action: {
+          action: entity ? "more-info" : "none",
+          entity: findEntity(["input_select"], ["ordres", "fil", "pilote"]) ?? entity,
+        },
+      }
+      : {}),
+    ...(descriptor.upstreamId === "custom_card_ristou_person"
+      ? {
+        ulm_custom_card_ristou_person_driving_entity: findEntity(["binary_sensor"], ["driving"]),
+        ulm_custom_card_ristou_find_device_script: findEntity(["script"], ["find"]),
+        ulm_custom_card_ristou_zones: available.filter((id) => id.startsWith("zone.")),
+        tap_action: { action: entity ? "more-info" : "none", entity },
+      }
+      : {}),
+  };
+};

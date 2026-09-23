@@ -1,0 +1,989 @@
+import type { AdditionConfig, CatalogItem } from "./types";
+import { PARITY_BY_ID } from "./parity.generated";
+import { supportedUpstreamOption } from "./supported-options";
+import { variantForSource } from "./catalog";
+
+export interface EditorField {
+  name: string;
+  selector: Record<string, unknown>;
+}
+
+const entity = (domains?: string[], name = "entity"): EditorField => ({
+  name,
+  selector: { entity: domains?.length ? { domain: domains } : {} },
+});
+const text = (name: string): EditorField => ({ name, selector: { text: {} } });
+const toggle = (name: string): EditorField => ({ name, selector: { boolean: {} } });
+const number = (name: string, min = 1, max = 168): EditorField => ({
+  name,
+  selector: { number: { min, max, mode: "box" } },
+});
+const action = (name: string): EditorField => ({ name, selector: { ui_action: {} } });
+const select = (name: string, options: Array<{ value: string; label: string }>): EditorField => ({
+  name,
+  selector: { select: { mode: "dropdown", options } },
+});
+
+const percentageOptions = new Set([
+  "ulm_card_light_enable_slider_minSet",
+  "ulm_card_light_enable_slider_maxSet",
+  "ulm_card_light_brightness_low",
+  "ulm_card_light_brightness_medium",
+  "ulm_card_light_brightness_high",
+  "ulm_card_battery_battery_level_danger",
+  "ulm_card_battery_battery_level_warning",
+  "ulm_card_cover_slider_min",
+  "ulm_card_cover_slider_max",
+  "ulm_card_cover_favorite_percentage",
+  "ulm_card_fan_slider_min",
+  "ulm_card_fan_slider_max",
+]);
+const booleanOptions = new Set([
+  "ulm_custom_card_bar_card_indicator",
+  "ulm_custom_card_bar_card_show_icon",
+  "ulm_custom_card_bar_card_value",
+  "ulm_card_generic_force_background_color",
+  "ulm_card_generic_swap_force_background_color",
+  "ulm_card_light_enable_horizontal_wide",
+  "ulm_card_media_player_collapsible",
+  "ulm_card_media_player_idle_off",
+  "ulm_card_media_player_more_info",
+  "ulm_card_media_player_power_button",
+  "ulm_card_media_player_force_background_color",
+]);
+const numericBoxOptions = new Set([
+  "ulm_custom_card_bar_card_min",
+  "ulm_custom_card_bar_card_max",
+  "ulm_card_graph_hours",
+  "ulm_card_graph_line_width",
+  "ulm_card_graph_points",
+  "ulm_card_media_player_enable_volume_adjust",
+]);
+const iconOptions = new Set([
+  "ulm_card_cover_icon",
+  "ulm_card_fan_button_icon",
+  "ulm_card_fan_icon",
+]);
+const homeAssistantUpdateEntities = new Set([
+  "ulm_card_homeassistant_entity",
+  "ulm_card_homeassistant_core",
+  "ulm_card_homeassistant_supervisor",
+  "ulm_card_homeassistant_os",
+]);
+const personInfoEntities = new Set([
+  "ulm_card_person_entity",
+  "ulm_card_person_zone1",
+  "ulm_card_person_zone2",
+  "ulm_address",
+  "ulm_address_locality",
+  "ulm_card_person_driving_entity",
+  "ulm_card_person_battery_entity",
+  "ulm_card_person_battery_state_entity",
+  "ulm_card_person_commute_entity",
+]);
+const certifiedCoreVariables = new Set([
+  "ulm_card_imswel_person_entity",
+  "ulm_card_imswel_person_wifi_tracker",
+  "ulm_card_imswel_person_gps_tracker",
+  "ulm_card_imswel_person_findmy_script",
+  "ulm_card_imswel_person_use_entity_picture",
+  "ulm_card_input_datetime_name",
+  "ulm_card_input_number_entity",
+  "ulm_card_input_number_name",
+  "ulm_custom_card_irmajavi_entities",
+  "ulm_custom_card_irmajavi_entities_entity_1",
+  "ulm_custom_card_irmajavi_entities_entity_2",
+  "ulm_custom_card_irmajavi_entities_entity_3",
+  "ulm_custom_card_irmajavi_entities_entity_4",
+  "ulm_custom_card_irmajavi_entities_icon",
+  "ulm_custom_card_irmajavi_entities_name",
+  "ulm_custom_card_irmajavi_entities_name_1",
+  "ulm_custom_card_irmajavi_entities_name_2",
+  "ulm_custom_card_irmajavi_entities_name_3",
+  "ulm_custom_card_irmajavi_entities_name_4",
+  "ulm_custom_card_irmajavi_entitites_name",
+  "ulm_custom_card_irmajavi_speedtest_color",
+  "ulm_custom_card_irmajavi_speedtest_download_speed_entity",
+  "ulm_custom_card_irmajavi_speedtest_ping_entity",
+  "ulm_custom_card_irmajavi_speedtest_router_model",
+  "ulm_custom_card_irmajavi_speedtest_router_name",
+  "ulm_custom_card_irmajavi_speedtest_upload_speed_entity",
+  "ulm_custom_card_irmajavi_weather",
+  "ulm_custom_card_irmajavi_weather_date",
+  "ulm_custom_card_irmajavi_weather_entity_1",
+  "ulm_custom_card_irmajavi_weather_entity_2",
+  "ulm_custom_card_irmajavi_weather_entity_3",
+  "ulm_custom_card_irmajavi_weather_entity_4",
+  "ulm_custom_card_irmajavi_weather_name_1",
+  "ulm_custom_card_irmajavi_weather_name_2",
+  "ulm_custom_card_irmajavi_weather_name_3",
+  "ulm_custom_card_irmajavi_weather_name_4",
+  "ulm_custom_card_irmajavi_weather_temperature_outside",
+]);
+
+const choiceOptions: Record<string, Array<{ value: string; label: string }>> = {
+  ulm_card_weather_primary_info: [
+    { value: "extrema", label: "Today's high and low temperatures" },
+    { value: "none", label: "Do not show extra information" },
+  ],
+  ulm_card_weather_secondary_info: [
+    { value: "precipitation", label: "Precipitation chance or amount" },
+    { value: "none", label: "Do not show extra information" },
+  ],
+};
+
+const presentation = (): EditorField[] => [
+  select("name_mode", [
+    { value: "entity", label: "Use entity name" },
+    { value: "custom", label: "Use custom name" },
+    { value: "none", label: "Hide name" },
+  ]),
+  text("name"),
+  { name: "icon", selector: { icon: {} } },
+  select("icon_type", [
+    { value: "icon", label: "Icon" },
+    { value: "entity-picture", label: "Entity picture" },
+    { value: "none", label: "No icon" },
+  ]),
+  select("layout", [
+    { value: "default", label: "Automatic" },
+    { value: "horizontal", label: "Horizontal" },
+    { value: "vertical", label: "Vertical" },
+  ]),
+  toggle("fill_container"),
+  select("primary_info", [
+    { value: "name", label: "Name" },
+    { value: "state", label: "State" },
+    { value: "none", label: "None" },
+  ]),
+  select("secondary_info", [
+    { value: "default", label: "Recommended card information" },
+    { value: "state", label: "State" },
+    { value: "name", label: "Name" },
+    { value: "last-changed", label: "Last changed" },
+    { value: "none", label: "None" },
+  ]),
+];
+
+const common = (item: CatalogItem): EditorField[] => [
+  entity(item.preferredDomains),
+  ...(item.variants?.length ? [select("variant", item.variants.map((variant) => ({
+    value: variant,
+    label: item.variantLabels?.[variant] ?? variant.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase()),
+  })))] : []),
+  ...presentation(),
+];
+
+const schemas: Record<string, (item: CatalogItem, config?: AdditionConfig) => EditorField[]> = {
+  weather: (item) => [
+    ...common(item),
+    entity(["sensor"], "temperature_entity"),
+    entity(["sensor"], "humidity_entity"),
+    toggle("show_forecast"),
+  ],
+  climate: (item) => [...common(item), entity(["sensor"], "humidity_entity"), toggle("show_controls")],
+  light: (item) => [...common(item)],
+  scene: (item) => [
+    ...common(item),
+    ...(item.upstreamId === "card_welcome_scenes"
+      ? [
+        entity(["input_boolean"], "collapse_entity"),
+        entity(["weather"], "weather_entity"),
+        text("settings_path"),
+        toggle("collapsed"),
+      ]
+      : []),
+  ],
+  presence: (item, config) => [
+    ...common(item),
+    ...(item.upstreamId === "card_room" ? [] : [
+    ...(config?.variant === "small" ? [] : [
+      entity(["sensor"], "battery_entity"),
+      entity(["sensor"], "eta_entity"),
+      entity(["sensor"], "address_entity"),
+    ]),
+    toggle("use_entity_picture"),
+    ]),
+  ],
+  battery: (item) => [...common(item)],
+  bar: (item) => [...common(item)],
+  energy: (item) => [...common(item), entity(["sensor"], "min_entity"), entity(["sensor"], "max_entity"), toggle("show_graph")],
+  sensor: (item) => [
+    ...common(item),
+    ...(item.upstreamId === "card_vertical_button"
+      ? [
+        { name: "ulm_card_vertical_button_color", selector: { ui_color: {} } },
+        text("ulm_card_vertical_button_state"),
+      ]
+      : [toggle("show_graph")]),
+  ],
+  media: (item) => [...common(item), toggle("show_controls")],
+  cover: (item) => [...common(item), toggle("show_controls")],
+  vacuum: (item) => [
+    ...common(item),
+    toggle("show_controls"),
+    ...(item.upstreamId === "card_vacuum"
+      ? [
+        entity(["camera"], "ulm_card_vacuum_camera"),
+        toggle("ulm_card_vacuum_camera_toggle"),
+        entity(["script"], "ulm_card_vacuum_room"),
+        { name: "ulm_card_vacuum_room_icon", selector: { icon: {} } },
+        toggle("ulm_card_vacuum_force_background_color"),
+      ]
+      : []),
+  ],
+  security: (item) => [...common(item)],
+  navigation: (item) => [
+    ...(item.variants?.length ? [select("variant", item.variants.map((variant) => ({
+      value: variant,
+      label: item.variantLabels?.[variant] ?? variant,
+    })))] : []),
+    ...presentation(),
+    text("navigation_path"),
+  ],
+  text: () => [...presentation(), text("secondary")],
+  camera: (item) => [...common(item)],
+  control: (item) => [
+    ...common(item),
+    ...(/power_outlet|more_power_outlet/.test(item.upstreamId) ? [entity(["sensor"], "graph_entity"), toggle("show_graph")] : []),
+    toggle("show_controls"),
+  ],
+  "alarm-time": (item) => [...common(item), entity(["input_datetime"], "datetime_entity"), toggle("show_controls")],
+  door: (item) => [...common(item), entity(["lock"], "lock_entity"), entity(["sensor"], "battery_entity"), toggle("show_controls")],
+  entity: (item) => [...common(item), text("secondary")],
+};
+
+export const editorSchemaFor = (item: CatalogItem, config?: AdditionConfig): EditorField[] => [
+  ...(item.upstreamId === "card_person"
+    ? [
+      entity(["person"]),
+      entity(["sensor"], "battery_entity"),
+      entity(["sensor"], "eta_entity"),
+      entity(["sensor"], "address_entity"),
+      toggle("use_entity_picture"),
+      ...presentation(),
+    ]
+    : item.upstreamId === "card_power_outlet"
+      ? [
+        entity(["switch", "light"]),
+        entity(["sensor"], "consumption_entity"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "card_room"
+      ? [
+        entity(),
+        toggle("label_use_temperature"),
+        toggle("label_use_brightness"),
+        entity(["input_select"], "input_select_entity"),
+        text("input_select_option"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "card_scenes"
+      ? [
+        ...(item.variants?.length ? [select("variant", item.variants.map((variant) => ({
+          value: variant,
+          label: item.variantLabels?.[variant] ?? variant,
+        })))] : []),
+        ...presentation(),
+      ]
+    : item.upstreamId === "card_script"
+      ? [entity(["script"]), ...presentation()]
+    : item.upstreamId === "card_thermostat"
+      ? [
+        entity(["climate"]),
+        toggle("ulm_card_thermostat_enable_collapse"),
+        toggle("ulm_card_thermostat_enable_controls"),
+        toggle("ulm_card_thermostat_enable_hvac_modes"),
+        toggle("ulm_card_thermostat_enable_background_color"),
+        toggle("ulm_card_thermostat_enable_display_temperature"),
+        toggle("ulm_card_thermostat_enable_horizontal"),
+        entity(["fan"], "fan_entity"),
+        number("thermostat_minimum_temp_spread", 0, 20),
+        number("thermostat_temp_step", 0.1, 10),
+        ...presentation(),
+      ]
+  : item.upstreamId === "custom_card_afvalophaling"
+    ? [
+      entity(["sensor", "calendar"]),
+      toggle("show_today"),
+      entity(["sensor"], "today_entity"),
+      toggle("show_tomorrow"),
+      entity(["sensor"], "tomorrow_entity"),
+      ...presentation(),
+    ]
+    : item.upstreamId === "custom_card_paddy_waste_collection"
+      ? [
+        entity(["sensor"]),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_paddy_welcome"
+      ? [
+        ...(item.variants?.length ? [select("variant", item.variants.map((variant) => ({
+          value: variant,
+          label: item.variantLabels?.[variant] ?? variant,
+        })))] : []),
+        entity(["person"]),
+        entity(["sensor"], "time_entity"),
+        entity(["weather"], "weather_entity"),
+        { name: "news_entities", selector: { entity: { multiple: true } } },
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_person_chip"
+      ? [
+        entity(["person", "device_tracker"]),
+        toggle("use_entity_picture"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_playstation"
+      ? [
+        entity(["media_player", "sensor"]),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_qubino"
+      ? [
+        entity(["light", "switch"]),
+        entity([], "qubino_more_info_entity"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_ristou_person"
+      ? [
+        entity(["person", "device_tracker"]),
+        toggle("ulm_custom_card_ristou_use_entity_picture"),
+        toggle("ulm_custom_card_ristou_use_badge"),
+        entity(["sensor"], "battery_entity"),
+        entity(["binary_sensor"], "ulm_custom_card_ristou_person_driving_entity"),
+        { name: "ulm_custom_card_ristou_zones", selector: { entity: { multiple: true } } },
+        entity(["script", "button"], "ulm_custom_card_ristou_find_device_script"),
+        toggle("ulm_custom_card_ristou_map_enable"),
+        text("ulm_custom_card_ristou_map_aspect_ratio"),
+        number("ulm_custom_card_ristou_map_hours_to_show", 0, 168),
+        number("ulm_custom_card_ristou_map_default_zoom", 1, 20),
+        entity(["camera"], "ulm_custom_card_ristou_camera_entity_light"),
+        entity(["camera"], "ulm_custom_card_ristou_camera_entity_dark"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_alarm_time"
+      ? [
+        entity(["input_boolean", "switch"]),
+        entity(["input_datetime"], "datetime_entity"),
+        number("ulm_card_alarm_time_step", 1, 180),
+        toggle("ulm_card_alarm_time_collapse"),
+        toggle("ulm_card_alarm_time_horizontal"),
+        { name: "ulm_card_alarm_time_icon", selector: { icon: {} } },
+        { name: "ulm_card_alarm_time_color", selector: { ui_color: {} } },
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_apexcharts"
+      ? [
+        entity(["sensor"]),
+        entity(["sensor"], "series_2_entity"),
+        entity(["sensor"], "series_3_entity"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_camera"
+      ? [
+        entity(["camera"]),
+        toggle("ulm_custom_card_camera_title"),
+        text("ulm_custom_card_camera_name"),
+        text("ulm_custom_card_camera_label"),
+        text("ulm_custom_card_camera_aspect_ratio"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_chromecast"
+      ? [
+        entity(["media_player"]),
+        text("ulm_card_media_player_with_controls_name"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_damix48_power_details"
+      ? [
+        entity(["sensor"]),
+        entity(["sensor"], "ulm_card_power_details_entity"),
+        text("ulm_card_power_details_name"),
+        number("ulm_card_power_details_hours", 1, 168),
+        number("ulm_card_power_details_height", 80, 600),
+        toggle("ulm_card_power_details_24hour"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_light_colorpick"
+      ? [
+        entity(["light"]),
+        text("ulm_card_light_colorpick_name"),
+        number("ulm_card_light_colorpick_transition", 0, 60),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_media_player_sonos"
+      ? [
+        entity(["media_player"]),
+        text("ulm_card_media_player_with_controls_name"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_more_power_outlet"
+      ? [
+        entity(["switch", "light"]),
+        entity(["sensor"], "power_entity"),
+        entity(["sensor"], "energy_entity"),
+        entity(["sensor"], "time_entity"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_mpse_gauge"
+      ? [
+        entity(["sensor"]),
+        number("minimum", -100000, 100000),
+        number("maximum", -100000, 100000),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_mpse_printer"
+      ? [
+        entity(["sensor", "binary_sensor"]),
+        entity(["sensor"], "black_entity"),
+        entity(["sensor"], "yellow_entity"),
+        entity(["sensor"], "magenta_entity"),
+        entity(["sensor"], "cyan_entity"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_mpse_thermostat"
+      ? [
+        entity(["climate"]),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_mpse_wifisignal"
+      ? [
+        entity(["sensor"]),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_nas"
+      ? [
+        entity(["sensor"]),
+        text("ulm_custom_card_nas_text"),
+        text("ulm_custom_card_nas_unit"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_neekster_update"
+      ? [
+        entity(["update"]),
+        toggle("ulm_card_neekster_update_enable_controls"),
+        toggle("ulm_card_neekster_update_collapsible"),
+        toggle("ulm_card_neekster_update_horizontal"),
+        toggle("ulm_card_neekster_update_narrow_buttons"),
+        { name: "ulm_card_neekster_update_icon", selector: { icon: {} } },
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_nik_clock"
+      ? [
+        entity(["sensor"]),
+        entity(["sensor"], "date_entity"),
+        entity(["input_boolean"], "clock_switch_entity"),
+        toggle("ulm_custom_card_nik_clock_switch_enable"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_nik_door"
+      ? [
+        entity(["sensor", "binary_sensor"]),
+        text("ulm_custom_card_entity_1_name"),
+        entity(["lock"], "lock_entity"),
+        entity(["sensor"], "battery_entity"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_paddy_dwd_pollen"
+      ? [
+        entity(["sensor"]),
+        entity(["sensor"], "level_entity"),
+        text("ulm_custom_card_paddy_dwd_pollen_name"),
+        { name: "ulm_custom_card_paddy_dwd_pollen_icon", selector: { icon: {} } },
+        select("pollen_language", [
+          { value: "en", label: "English" },
+          { value: "de", label: "German" },
+          { value: "es", label: "Spanish" },
+          { value: "pl", label: "Polish" },
+        ]),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_device_tracker"
+      ? [
+        entity(["device_tracker", "person"]),
+        { name: "ulm_custom_card_device_tracker_icon", selector: { icon: {} } },
+        entity(["device_tracker"], "ulm_custom_card_device_tracker_tracker_1_entity"),
+        select("ulm_custom_card_device_tracker_tracker_1_type", [
+          { value: "default", label: "Home" },
+          { value: "lan", label: "LAN" },
+          { value: "bluetooth", label: "Bluetooth" },
+        ]),
+        entity(["device_tracker"], "ulm_custom_card_device_tracker_tracker_2_entity"),
+        select("ulm_custom_card_device_tracker_tracker_2_type", [
+          { value: "default", label: "Home" },
+          { value: "lan", label: "LAN" },
+          { value: "bluetooth", label: "Bluetooth" },
+        ]),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_drealine_roomview"
+      ? [
+        entity(item.preferredDomains),
+        entity(["group", "light"], "group_lights"),
+        entity(["group", "binary_sensor"], "group_motions"),
+        entity(["group", "binary_sensor"], "group_doors"),
+        entity(["group", "binary_sensor"], "group_windows"),
+        entity(["group", "switch"], "group_outlets"),
+        entity(["group", "media_player"], "group_tv"),
+        entity(["group", "binary_sensor"], "group_water"),
+        entity(["group", "cover"], "group_windows_shutters"),
+        entity(["sensor"], "temperature"),
+        entity(["sensor"], "humidity"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_eraycetinay_elapsed_time"
+      ? [
+        entity(["input_datetime"]),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_eraycetinay_lock"
+      ? [
+        entity(["lock"]),
+        toggle("ulm_custom_card_eraycetinay_lock_tap_control"),
+        toggle("ulm_custom_card_eraycetinay_lock_only_open"),
+        entity(["sensor", "binary_sensor"], "ulm_custom_card_eraycetinay_lock_battery_level"),
+        number("ulm_custom_card_eraycetinay_lock_battery_warning", 0, 100),
+        number("ulm_custom_card_eraycetinay_lock_battery_warning_low", 0, 100),
+        entity(["binary_sensor"], "ulm_custom_card_eraycetinay_lock_door_open"),
+        toggle("ulm_custom_card_eraycetinay_lock_battery_sensor_binary"),
+        select("ulm_custom_card_eraycetinay_lock_battery_sensor_binary_low_state", [
+          { value: "on", label: "On means low" },
+          { value: "off", label: "Off means low" },
+        ]),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_esh_room"
+      ? [
+        entity(),
+        entity(["light"], "ulm_custom_card_esh_room_light_entity"),
+        entity(["climate"], "ulm_custom_card_esh_room_climate_entity"),
+        entity(["cover"], "ulm_custom_card_esh_room_cover_entity"),
+        { name: "ulm_card_esh_room_light_icon_on", selector: { icon: {} } },
+        { name: "ulm_card_esh_room_light_icon_off", selector: { icon: {} } },
+        { name: "ulm_card_esh_room_cover_icon_open", selector: { icon: {} } },
+        { name: "ulm_card_esh_room_cover_icon_closed", selector: { icon: {} } },
+        toggle("ulm_card_dynamic_color"),
+        text("secondary"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_esh_welcome"
+      ? [
+        entity(["person"]),
+        entity(["input_boolean"], "ulm_card_esh_welcome_collapse"),
+        entity(["weather"], "ulm_weather"),
+        ...Array.from({ length: 5 }, (_, index) => index + 1).flatMap((index) => [
+          text(`nav_${index}`),
+          { name: `icon_${index}`, selector: { icon: {} } },
+          text(`name_${index}`),
+          select(`color_${index}`, ["blue", "red", "green", "yellow", "pink", "purple"].map((value) => ({
+            value,
+            label: value[0].toUpperCase() + value.slice(1),
+          }))),
+        ]),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_saxel_fan"
+      ? [
+        entity(["fan"]),
+        toggle("collapsable"),
+        toggle("ulm_card_fan_horizontal"),
+        text("ulm_card_fan_temp_attribute"),
+        text("ulm_card_fan_hum_attribute"),
+        toggle("always_show_attributes"),
+        toggle("ulm_show_button"),
+        { name: "ulm_button_icon", selector: { icon: {} } },
+        text("ulm_button_service"),
+        text("oscillate_attribute"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_schumijo_car"
+      ? [
+        entity(["device_tracker", "sensor"]),
+        entity(["device_tracker", "sensor"], "ulm_card_schumijo_car_tracker"),
+        entity(["lock", "binary_sensor"], "ulm_card_schumijo_car_lock"),
+        entity(["sensor"], "ulm_card_schumijo_car_energy_level"),
+        entity(["sensor"], "ulm_card_schumijo_car_range"),
+        text("ulm_card_schumijo_car_name"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_schumijo_flower"
+      ? [
+        entity(["plant", "sensor"]),
+        entity(["plant", "sensor"], "ulm_card_flower_entity"),
+        text("ulm_card_flower_name"),
+        text("ulm_card_flower_species"),
+        { name: "ulm_card_flower_show_bars", selector: { object: {} } },
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_senoro_win"
+      ? [
+        entity(["binary_sensor"]),
+        entity(["sensor"], "ulm_custom_card_senoro_win_handle"),
+        text("ulm_custom_card_senoro_win_name"),
+        { name: "ulm_custom_card_senoro_win_icon", selector: { icon: {} } },
+        { name: "ulm_custom_card_senoro_win_color", selector: { ui_color: {} } },
+        toggle("ulm_custom_card_senoro_win_force_background_color"),
+        entity(["sensor"], "ulm_custom_card_senoro_win_battery_level"),
+        number("ulm_custom_card_senoro_win_battery_warning", 0, 100),
+        number("ulm_custom_card_senoro_win_battery_warning_low", 0, 100),
+        toggle("ulm_show_last_changed"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_sisimomo_printer"
+      ? [
+        entity(["sensor", "binary_sensor"]),
+        text("ulm_card_printer_name"),
+        { name: "cartridges", selector: { object: {} } },
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_haven_washer"
+      ? [
+        entity(["sensor", "switch", "binary_sensor"]),
+        entity(["sensor", "switch", "binary_sensor"], "power_entity"),
+        entity(["sensor", "binary_sensor"], "door_entity"),
+        entity(["sensor", "binary_sensor"], "finished_entity"),
+        entity(["sensor", "binary_sensor"], "ulm_custom_card_washer_remote_control"),
+        entity(["sensor"], "ulm_custom_card_washer_job_progress"),
+        entity(["input_boolean"], "ulm_custom_card_washer_delayed_start"),
+        entity(["input_datetime"], "ulm_custom_card_washer_delayed_starttime"),
+        text("ulm_custom_card_washer_machine_stop_state"),
+        { name: "ulm_custom_card_washer_job_states", selector: { object: {} } },
+        text("ulm_custom_card_washer_label_idle"),
+        text("ulm_custom_card_washer_label_configuring"),
+        text("ulm_custom_card_washer_label_running"),
+        action("ulm_custom_card_washer_start_action"),
+        action("ulm_custom_card_washer_pause_action"),
+        action("ulm_custom_card_washer_stop_action"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_httpedo13_sun"
+      ? [
+        entity(["sun"]),
+        text("title"),
+        text("language"),
+        select("timeFormat", [
+          { value: "24h", label: "24-hour time" },
+          { value: "12h", label: "12-hour time" },
+        ]),
+        toggle("darkMode"),
+        toggle("showAzimuth"),
+        toggle("showElevation"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_httpedo13_thermostat"
+      ? [
+        entity(["climate"]),
+        select("variant", [
+          { value: "buttons", label: "Always show controls" },
+          { value: "collapse", label: "Hide controls while off" },
+        ]),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_iAbadia_battery_chip"
+      ? [
+        entity(["sensor"]),
+        entity(["sensor", "binary_sensor"], "battery_state_entity"),
+        entity(["sensor"], "charger_type_entity"),
+        { name: "ulm_custom_card_iAbadia_battery_chip_icon", selector: { icon: {} } },
+        number("ulm_custom_card_iAbadia_battery_chip_warning", 0, 100),
+        number("ulm_custom_card_iAbadia_battery_chip_danger", 0, 100),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_imswel_medias"
+      ? [
+        entity(["sensor", "media_player"]),
+        entity(["sensor", "media_player"], "secondary_entity"),
+        select("variant", [
+          { value: "library", label: "Recently added library" },
+          { value: "upcoming", label: "Upcoming media" },
+        ]),
+        number("ulm_custom_card_imswel_medias_index", 0, 100),
+        select("ulm_custom_card_imswel_medias_platform", [
+          { value: "plex", label: "Plex" },
+          { value: "radarr", label: "Radarr" },
+          { value: "sonarr", label: "Sonarr" },
+        ]),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_wsly_pollen"
+      ? [
+        entity(["sensor"]),
+        entity(["sensor"], "trees_entity"),
+        text("custom_card_wsly_pollen_tree_name"),
+        { name: "custom_card_wsly_pollen_tree_icon", selector: { icon: {} } },
+        entity(["sensor"], "grass_entity"),
+        text("custom_card_wsly_pollen_grass_name"),
+        { name: "custom_card_wsly_pollen_grass_icon", selector: { icon: {} } },
+        entity(["sensor"], "weeds_entity"),
+        text("custom_card_wsly_pollen_weed_name"),
+        { name: "custom_card_wsly_pollen_weed_icon", selector: { icon: {} } },
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_yagrasdemonde_lights_count"
+      ? [
+        entity(["sensor"]),
+        select("ulm_custom_card_yagrasdemonde_lights_count_type", [
+          { value: "light", label: "Lights" },
+          { value: "cover", label: "Covers" },
+        ]),
+        { name: "ulm_custom_card_yagrasdemonde_lights_count_icon_on", selector: { icon: {} } },
+        { name: "ulm_custom_card_yagrasdemonde_lights_count_icon_off", selector: { icon: {} } },
+        { name: "ulm_custom_card_yagrasdemonde_lights_count_color", selector: { ui_color: {} } },
+        toggle("ulm_custom_card_yagrasdemonde_lights_count_force_background_color"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_speedtest_shogun160"
+      ? [
+        entity(["sensor"]),
+        entity(["sensor"], "download_entity"),
+        { name: "ulm_custom_card_speedtest_download_speed_color", selector: { ui_color: {} } },
+        number("ulm_custom_card_speedtest_download_speed_max", 1, 100000),
+        entity(["sensor"], "upload_entity"),
+        { name: "ulm_custom_card_speedtest_upload_speed_color", selector: { ui_color: {} } },
+        number("ulm_custom_card_speedtest_upload_speed_max", 1, 100000),
+        entity(["sensor"], "ping_entity"),
+        { name: "ulm_custom_card_speedtest_ping_color", selector: { ui_color: {} } },
+        number("ulm_custom_card_speedtest_ping_max", 1, 100000),
+        toggle("ulm_custom_card_speedtest_round"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_tpx01_aircondition"
+      ? [
+        entity(["climate"]),
+        text("name"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_vncntdev_device_tracer"
+      ? [
+        entity(["device_tracker", "switch"]),
+        text("custom_card_vncntdev_device_tracker_name"),
+        toggle("custom_card_vncntdev_device_tracker_status_as_name"),
+        { name: "custom_card_vncntdev_device_tracker_icon", selector: { icon: {} } },
+        { name: "custom_card_vncntdev_device_tracker_color_online", selector: { ui_color: {} } },
+        { name: "custom_card_vncntdev_device_tracker_color_offline", selector: { ui_color: {} } },
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_water_heater"
+      ? [
+        entity(["water_heater"]),
+        entity(["sensor"], "power_entity"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "card_title" && config?.variant === "divider-title"
+      ? [
+        text("name"),
+        text("navigation_path"),
+        ...(item.variants?.length ? [select("variant", item.variants.map((variant) => ({
+          value: variant,
+          label: item.variantLabels?.[variant] ?? variant,
+        })))] : []),
+      ]
+    : item.upstreamId === "card_title" && config?.variant === "divider-subtitle"
+      ? [
+        text("name"),
+        ...(item.variants?.length ? [select("variant", item.variants.map((variant) => ({
+          value: variant,
+          label: item.variantLabels?.[variant] ?? variant,
+        })))] : []),
+      ]
+    : item.upstreamId === "custom_card_nik_nas"
+      ? [
+        entity(["binary_sensor", "sensor", "switch"]),
+        entity(["sensor"], "disk_entity"),
+      text("disk_name"),
+      { name: "disk_icon", selector: { icon: {} } },
+      { name: "disk_color", selector: { ui_color: {} } },
+      entity(["sensor"], "temperature_entity"),
+      text("temperature_name"),
+      { name: "temperature_icon", selector: { icon: {} } },
+      { name: "temperature_color", selector: { ui_color: {} } },
+      number("temperature_max", 1, 100000),
+      entity(["sensor"], "memory_entity"),
+      text("memory_name"),
+      { name: "memory_icon", selector: { icon: {} } },
+      { name: "memory_color", selector: { ui_color: {} } },
+      number("memory_max", 1, 100000),
+      entity(["sensor"], "cpu_entity"),
+      text("cpu_name"),
+      { name: "cpu_icon", selector: { icon: {} } },
+      { name: "cpu_color", selector: { ui_color: {} } },
+      number("cpu_max", 1, 100000),
+      text("graph_span"),
+      select("chart_type", [{ value: "radialBar", label: "Radial utilization rings" }]),
+      ...presentation(),
+    ]
+    : item.upstreamId === "custom_card_imswel_person"
+      ? [
+        entity(["person"]),
+        entity(["device_tracker"], "wifi_tracker_entity"),
+        entity(["device_tracker"], "gps_tracker_entity"),
+        entity(["script"], "findmy_script_entity"),
+        entity(["sensor"], "battery_entity"),
+        toggle("use_entity_picture"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_input_datetime"
+      ? [
+        entity(["input_datetime"]),
+        text("ulm_card_input_datetime_name"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_input_number"
+      ? [
+        entity(["input_number", "counter", "select", "input_select"]),
+        text("ulm_card_input_number_name"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_irmajavi_entities"
+      ? [
+        entity(),
+        { name: "ulm_custom_card_irmajavi_entities_icon", selector: { icon: {} } },
+        text("ulm_custom_card_irmajavi_entities_name"),
+        ...[1, 2, 3, 4].flatMap((index) => [
+          entity(undefined, `ulm_custom_card_irmajavi_entities_entity_${index}`),
+          text(`ulm_custom_card_irmajavi_entities_name_${index}`),
+        ]),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_irmajavi_speedtest"
+      ? [
+        entity(["sensor"]),
+        entity(["sensor"], "download_entity"),
+        entity(["sensor"], "upload_entity"),
+        entity(["sensor"], "ping_entity"),
+        text("ulm_custom_card_irmajavi_speedtest_router_name"),
+        text("ulm_custom_card_irmajavi_speedtest_router_model"),
+        { name: "ulm_custom_card_irmajavi_speedtest_color", selector: { ui_color: {} } },
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_irmajavi_weather"
+      ? [
+        entity(["weather"]),
+        entity(["sensor"], "temperature_entity"),
+        entity(["sensor"], "date_entity"),
+        ...[1, 2, 3, 4].flatMap((index) => [
+          entity(undefined, `ulm_custom_card_irmajavi_weather_entity_${index}`),
+          text(`ulm_custom_card_irmajavi_weather_name_${index}`),
+        ]),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_homeassistant_updates"
+        ? [
+        entity(["update", "sensor", "binary_sensor"]),
+        entity(["update", "sensor", "binary_sensor"], "ulm_card_homeassistant_core"),
+        entity(["update", "sensor", "binary_sensor"], "ulm_card_homeassistant_supervisor"),
+        entity(["update", "sensor", "binary_sensor"], "ulm_card_homeassistant_os"),
+        ...presentation(),
+      ]
+    : item.upstreamId === "custom_card_nik_tablet"
+      ? [
+          entity(["binary_sensor", "sensor", "switch"]),
+          entity(["switch", "input_boolean"], "tablet_button_usb_entity"),
+          entity(["switch", "input_boolean"], "tablet_button_motion_entity"),
+          entity(["light", "switch", "input_boolean"], "tablet_button_display_entity"),
+          entity(["button"], "tablet_restart_entity"),
+          entity(["switch", "input_boolean"], "tablet_maintenance_entity"),
+          entity(["button"], "tablet_reload_entity"),
+          entity(["sensor"], "tablet_ram_entity"),
+          entity(["sensor"], "tablet_disk_entity"),
+          entity(["sensor", "binary_sensor", "switch"], "tablet_power_entity"),
+          entity(["sensor"], "battery_entity"),
+          ...presentation(),
+        ]
+        : item.upstreamId === "custom_card_person_info"
+          ? [
+            entity(["person"]),
+            ...(item.variants?.length ? [select("variant", item.variants.map((variant) => ({
+              value: variant,
+              label: item.variantLabels?.[variant] ?? variant,
+            })))] : []),
+            toggle("ulm_card_person_use_entity_picture"),
+            entity(["zone"], "ulm_card_person_zone1"),
+            entity(["zone"], "ulm_card_person_zone2"),
+            ...(config?.variant === "small"
+              ? []
+              : [
+                entity(["sensor"], "ulm_card_person_commute_entity"),
+                { name: "ulm_card_person_cummute_icon", selector: { icon: {} } },
+                toggle("ulm_multiline"),
+              ]),
+            entity(["sensor"], "ulm_address"),
+            entity(["sensor"], "ulm_address_locality"),
+            entity(["binary_sensor"], "ulm_card_person_driving_entity"),
+            entity(["sensor"], "ulm_card_person_battery_entity"),
+            entity(["sensor", "binary_sensor"], "ulm_card_person_battery_state_entity"),
+            number("ulm_card_battery_battery_level_danger", 0, 100),
+            number("ulm_card_battery_battery_level_warning", 0, 100),
+            ...presentation(),
+          ]
+    : (schemas[item.family] ?? schemas.entity)(item, config)),
+  action("tap_action"),
+  action("hold_action"),
+  action("double_tap_action"),
+];
+
+export const upstreamEditorSchemaFor = (item: CatalogItem, config?: AdditionConfig): EditorField[] => {
+  const selectedSources = config?.variant
+    ? (item.sourceIds ?? [item.upstreamId]).filter((sourceId) =>
+      variantForSource(sourceId) === config.variant || (
+        sourceId === item.upstreamId && variantForSource(sourceId) === undefined
+      ))
+    : (item.sourceIds ?? [item.upstreamId]);
+  const variables = [...new Map(
+    selectedSources
+      .flatMap((sourceId) => PARITY_BY_ID.get(sourceId)?.variables ?? [])
+      .map((variable) => [variable.name, variable]),
+  ).values()];
+  return variables
+    .filter((variable) => supportedUpstreamOption(item, variable.name))
+    .filter((variable) => !certifiedCoreVariables.has(variable.name))
+    .filter((variable) => !(item.upstreamId === "custom_card_homeassistant_updates" &&
+      variable.name === "ulm_card_homeassistant_entity"))
+    .filter((variable) => !(item.upstreamId === "custom_card_person_info" && (
+      personInfoEntities.has(variable.name) ||
+      variable.name === "ulm_card_person_use_entity_picture" ||
+      variable.name === "ulm_card_person_cummute_icon" ||
+      variable.name === "ulm_multiline" ||
+      variable.name === "ulm_card_battery_battery_level_danger" ||
+      variable.name === "ulm_card_battery_battery_level_warning"
+    )))
+    .map((variable) => {
+    if (item.upstreamId === "custom_card_homeassistant_updates" && homeAssistantUpdateEntities.has(variable.name)) {
+      return entity(["update", "sensor", "binary_sensor"], variable.name);
+    }
+    if (item.upstreamId === "custom_card_person_info" && personInfoEntities.has(variable.name)) {
+      const domains =
+        variable.name === "ulm_card_person_entity" ? ["person"] :
+          variable.name.startsWith("ulm_card_person_zone") ? ["zone"] :
+            variable.name === "ulm_card_person_driving_entity" ? ["binary_sensor"] :
+              ["sensor", "binary_sensor"];
+      return entity(domains, variable.name);
+    }
+    const choices = choiceOptions[variable.name];
+    if (choices) return select(variable.name, choices);
+    if (iconOptions.has(variable.name)) return { name: variable.name, selector: { icon: {} } };
+    if (booleanOptions.has(variable.name)) return toggle(variable.name);
+    if (numericBoxOptions.has(variable.name)) return number(variable.name, -100000, 100000);
+    if (percentageOptions.has(variable.name)) {
+      return {
+        name: variable.name,
+        selector: { number: { min: 0, max: 100, step: 1, mode: "slider", unit_of_measurement: "%" } },
+      };
+    }
+    switch (variable.selector) {
+      case "entity": return entity(undefined, variable.name);
+      case "entity-multiple": return {
+        name: variable.name,
+        selector: { entity: { multiple: true } },
+      };
+      case "action": return action(variable.name);
+      case "icon": return { name: variable.name, selector: { icon: {} } };
+      case "color": return { name: variable.name, selector: { ui_color: {} } };
+      case "boolean": return toggle(variable.name);
+      case "number": return number(variable.name, -100000, 100000);
+      case "object": return { name: variable.name, selector: { object: {} } };
+      default: return text(variable.name);
+    }
+  });
+};

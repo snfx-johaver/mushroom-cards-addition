@@ -1,0 +1,81 @@
+{
+  "verifiedAt": "2026-09-23T22:46:00+02:00",
+  "homeAssistantVersion": "2026.9.3",
+  "candidate": {
+    "branch": "snfx-johaver-certify-custom-inputs",
+    "commit": "05d5f06307c5aff1d90f3a72bbcf92327de1ffc6",
+    "resource": "/local/community/mushroom-cards-addition/mushroom-cards-addition.js?v=1.6.0-inputs-a2eb0b67",
+    "sha256": "A2EB0B67595D3BA16E90E1AFA3C49C5014FEC93D37969BD82145C1D00D21B0E8",
+    "bytes": 425548,
+    "backupSuffix": "20260923-224254"
+  },
+  "dashboard": {
+    "semanticConfigsInstalled": true,
+    "backupSuffix": "20260923-224324"
+  },
+  "sources": {
+    "custom_card_imswel_person": {
+      "entity": "person.joris",
+      "batteryEntity": "sensor.joris_mobile_battery_level",
+      "text": "Joris Home",
+      "geometry": [330, 68.578125],
+      "overflow": false,
+      "moreInfoEntity": "person.joris",
+      "screenshot": "live-inputs-imswel-person.png"
+    },
+    "custom_card_input_datetime": {
+      "entity": "input_datetime.quiet_time_start",
+      "text": "Quiet time start 21:30:00 21:30",
+      "geometry": [330, 122.578125],
+      "overflow": false,
+      "controls": ["15 minutes earlier", "One minute later; hold for one minute earlier", "15 minutes later"],
+      "stateTransition": ["21:30:00", "21:15:00", "21:30:00"],
+      "restored": true,
+      "screenshot": "live-inputs-input-datetime.png"
+    },
+    "custom_card_input_number": {
+      "entity": "input_number.missing",
+      "text": "Entity unavailable",
+      "geometry": [330, 120.578125],
+      "overflow": false,
+      "allThreeControlsDisabled": true,
+      "serviceCalls": [],
+      "screenshot": "live-inputs-input-number.png"
+    },
+    "custom_card_irmajavi_entities": {
+      "entity": "light.joris_iris_1",
+      "entities": ["light.joris_iris_1", "sensor.office_joris_temperature_3", "switch.office_joris_plug_3"],
+      "geometry": [330, 160],
+      "overflow": false,
+      "moreInfoEntities": ["light.joris_iris_1", "sensor.office_joris_temperature_3", "switch.office_joris_plug_3"],
+      "missingFourthSlotDisabled": true,
+      "screenshot": "live-inputs-irmajavi-entities.png"
+    },
+    "custom_card_irmajavi_speedtest": {
+      "downloadEntity": "sensor.speedtest_download",
+      "uploadEntity": "sensor.speedtest_upload",
+      "pingEntity": "sensor.speedtest_ping",
+      "geometry": [330, 280.578125],
+      "overflow": false,
+      "downloadMoreInfoEntity": "sensor.speedtest_download",
+      "uploadMoreInfoEntity": "sensor.speedtest_upload",
+      "updateActionOperated": false,
+      "screenshot": "live-inputs-irmajavi-speedtest.png"
+    },
+    "custom_card_irmajavi_weather": {
+      "entity": "weather.hcn_ha",
+      "text": "Date unavailable 16° Entity unavailable",
+      "geometry": [330, 160],
+      "overflow": false,
+      "unconfiguredMetricButtonsDisabled": true,
+      "screenshot": "live-inputs-irmajavi-weather.png"
+    }
+  },
+  "picker": {
+    "allSixRegisteredAndPreviewable": true
+  },
+  "editor": {
+    "allSixDedicatedSemanticSchemasVerified": true
+  },
+  "accepted": true
+}
